@@ -277,7 +277,7 @@ export let scenario = {
 ```
 
 
-You can get documentation from "out" folder. 
+You can get documentation from "out" folder. Also, you can get it at https://onien-12.github.io/visualnovel/ <br>
 Template scenario you can find in root directory "scenariotemplate.js" <br><br>
 
 ## Todo:
