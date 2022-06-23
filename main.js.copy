@@ -1,0 +1,357 @@
+import Windows from "./windowSystem.js";
+
+let 
+	ScenesElement = document.querySelector(".scenes"),
+	NewSceneButton = document.querySelector(".headerButtons.newScene"),
+	NewSequenceButton = document.querySelector(".headerButtons.newSequence"),
+	LoadImageButton = document.querySelector(".headerButtons.loadImage"),
+	WindowsElement = document.querySelector(".windows");
+
+let Scenes = window.Scenes = [];
+let windows = new Windows("window", WindowsElement, {
+	cssInject: true
+});
+
+const getOpenButtons = (selector = "button.gotoScene") => {
+	return [...document.querySelectorAll(selector)]
+}
+
+const CreateNewScene = (element) => {
+	bootbox.prompt("Enter scene name", (name) => {
+		if (name == null) return bootbox.alert("Enter not empty string!")
+		Scenes.push({
+			name: name,
+			dialogs: []
+		});
+		scenesSync(element, Scenes);	
+	});
+}
+
+const buttonsSetup = (newScene, newSequence, loadImage, opens) => {
+	newScene.onclick = () => {
+		CreateNewScene(ScenesElement); // ScenesElement - global
+	};
+}
+
+const scenesSync = (element, scenes = Scenes) => {
+	element.innerHTML = "";
+
+	scenes.map((scene, idx) => {
+		let newScene = document.createElement("div");
+		newScene.classList.add("scene");
+		newScene.setAttribute("sceneId", idx);
+
+		let sceneElements = {
+			sceneName: { element: document.createElement("span"), sets: {
+				innerHTML: scene.name
+			} },
+			sceneActions: { element: document.createElement("span"), sets: {
+				innerHTML: scene.dialogs.length > 0 ? scene.dialogs.length : "there are no dialogs"
+			} },
+			gotoScene: {
+				element: document.createElement("button"),
+				sets: {
+					className: "btn btn-primary navy gotoScene",
+					innerHTML: "Open"
+				}
+			}
+		}
+
+		Object.keys(sceneElements).forEach(className => {
+			let sceneElement = sceneElements[className];
+			sceneElement.element.classList.add(className);
+			Object.keys(sceneElement.sets).forEach(setting => {
+				let value = sceneElement.sets[setting];
+				sceneElement.element[setting] = value;
+			});
+			if (sceneElement.attributes != undefined) {
+				Object.keys(sceneElement.attributes).forEach(attributeName => {
+					let atttribute = sceneElement.attributes[attributeName];
+					sceneElement.setAttribute(attributeName, atttribute);
+				});
+			}
+			newScene.appendChild(sceneElement.element);
+		});
+
+		element.appendChild(newScene);
+	});
+
+	getOpenButtons().forEach(button => {
+		button.onclick = () => {
+			openScene(button.parentNode, parseInt(button.parentNode.getAttribute("sceneId")));
+		}	
+	});
+}
+
+const inputBox = (options) => {
+	let box = document.createElement(options.tag ?? "input");
+	box.innerHTML = options?.innerHTML;
+	options.classList != undefined ? box.classList.add(...options.classList) : null;
+	Object.assign(box.style, options.style);
+	if (options.attributes != undefined) {
+		Object.keys(options.attributes).forEacha(attr => {
+			let value = options.attributes[attr];
+			box.setAttribute(attr, value);
+		});
+	}
+	return box;
+}
+
+const textElement = (options) => {
+	let element = document.createElement(options.tag ?? "span");
+	element.innerHTML = options?.innerHTML;
+	Object.assign(element.style, options.style);
+	options.classList != undefined ? element.classList.add(...options.classList) : null;
+
+	return element;
+}
+
+const makeDialogArticle = (name, id) => {
+	let parent = document.createElement("div");
+	parent.classList.add("dialogArticleOne");
+	parent.setAttribute("dialogId", id);
+
+	let dialogCharNameText = textElement({
+		innerHTML: name,
+		classList: ["dialogArticleName"]
+	});
+
+	let gotoDialog = inputBox({ 
+		tag: "button",
+		innerHTML: "Open",
+		classList: ["openDialogButton" , "btn", "btn-primary"]
+	});
+
+	parent.appendChild(dialogCharNameText);
+	parent.appendChild(gotoDialog);
+
+	return parent;
+}
+
+const makeSetupUI = () => {
+	let parent = document.createElement("div");
+	parent.classList.add("setupUIRoot");
+	
+	let nameBoxParent = document.createElement("div");
+	nameBoxParent.classList.add("nameBoxParent");
+
+	let nameBox = inputBox({
+		classList: ["sceneInputName"]
+	});
+
+	let nameLabel = textElement({
+		tag: "label",
+		innerHTML: "Scene name: ",
+		classList: ["nameBoxLabel"],
+		style: {
+			marginRight: "5px"
+		}
+	});
+
+	let saveButton = inputBox({
+		tag: "button",
+		innerHTML: "Save",
+		classList: ["sceneEditSave", "btn", "btn-primary"],
+		style: {
+			position: "absolute",
+			bottom: 0,
+			right: 0,
+			marginBottom: "5px",
+			marginRight: "5px"
+		}
+	});
+
+	let newDialogButton = inputBox({
+		tag: "button",
+		innerHTML: "New dialog",
+		classList: ["newDialogButton", "btn", "btn-success"]
+	});
+
+	let dialogs = document.createElement("div");
+	dialogs.classList.add("dialogSetupArticle");
+
+	nameBoxParent.appendChild(nameLabel);
+	nameLabel.appendChild(nameBox);
+
+	parent.appendChild(nameBoxParent);
+	parent.appendChild(saveButton);
+	parent.appendChild(dialogs);
+	parent.appendChild(newDialogButton);
+
+	return {
+		boxes: {
+			nameLabel: nameLabel,
+			nameBox: nameBox,
+			nameBoxParent: nameBoxParent,
+			saveButton: saveButton,
+			dialogs: dialogs
+		},
+		parent: parent
+	};
+}
+
+const makeInputWithLabel = (options) => {
+	let Parent = document.createElement("div");
+	Parent.classList.add(...options.classList);
+
+	let Box = inputBox({
+		classList: ["inputBox"],
+		style: options.style
+	});
+
+	let Label = textElement({
+		tag: "label",
+		innerHTML: options.name,
+		classList: ["labelBox"],
+		style: {
+			marginRight: "5px"
+		}
+	});
+
+	Parent.appendChild(Label);
+	Label.appendChild(Box);
+
+	return Parent;
+}
+
+const makeDialogUI = () => {
+	let parent = document.createElement("div");
+	parent.classList.add("dialogSetup");
+
+	let charName = makeInputWithLabel({
+		name: "Character name: ",
+		classList: ["characterName"]
+	});
+
+	let dialogText = makeInputWithLabel({
+		name: "Dialog text: ",
+		classList: ["dialogTextParent"],
+		style: {
+			marginTop: "10px"
+		}
+	});
+
+	let timeoutText = makeInputWithLabel({
+		name: "Timeout: ",
+		classList: ["timeoutText"],
+		style: {
+			marginTop: "10px"
+		}
+	});
+
+	let saveButton = inputBox({
+		tag: "button",
+		innerHTML: "Save",
+		classList: ["dialogSaveButton", "btn", "btn-primary"],
+		style: {
+			position: "absolute",
+			bottom: 0,
+			right: 0,
+			marginBottom: "5px",
+			marginRight: "5px"
+		}
+	});
+
+	parent.appendChild(charName);
+	parent.appendChild(dialogText);
+	parent.appendChild(timeoutText);
+	parent.appendChild(saveButton);
+
+	return {		
+		parent: parent
+	}
+}
+
+const openScene = (sceneElement, index) => {
+	let thisWindow = windows.addWindow();
+	let ui = makeSetupUI();
+	let scene = Scenes[index];
+
+	thisWindow.open(thisWindow);
+	thisWindow.setTitle(`Editing scene: ${scene.name}`, thisWindow.id);
+	thisWindow.window_html(ui.parent.outerHTML, thisWindow.id);
+
+	dialogsSync(scene.dialogs, thisWindow.getFromContent(".setupUIRoot > .dialogSetupArticle", thisWindow.id), scene, thisWindow);
+	
+	let sceneNameInput = thisWindow.getFromContent(".setupUIRoot > .nameBoxParent > .nameBoxLabel > .sceneInputName", thisWindow.id);
+	let dialogArticles = thisWindow.getFromContent(".setupUIRoot > .dialogSetupArticle", thisWindow.id);
+
+	sceneNameInput.value = scene.name;
+
+	// -------------------- EVENTS --------------------
+
+	thisWindow.getFromContent(".setupUIRoot > .sceneEditSave", thisWindow.id).onclick = (event) => {
+		scene.name = sceneNameInput.value;
+
+		scenesSync(ScenesElement);
+		
+		thisWindow.setTitle(`Editing scene: ${scene.name}`, thisWindow.id);
+	};
+	
+	thisWindow.getFromContent(".setupUIRoot > .newDialogButton", thisWindow.id).onclick = (event) => {
+		bootbox.prompt("Enter character name", (name) => {
+			scene.dialogs.push({
+				name: name
+			});
+			dialogsSync(scene.dialogs, thisWindow.getFromContent(".setupUIRoot > .dialogSetupArticle", thisWindow.id), scene, thisWindow);
+			scenesSync(ScenesElement);
+			thisWindow.style.minHeight = (dialogArticles.offsetHeight + 100) + "px";
+			
+		});
+	}
+}
+
+const openDialog = (dialog, scene, sceneDialog, setupWindow) => {
+	let dialogWindow = windows.addWindow();
+	let ui = makeDialogUI();
+	let index = dialog.getAttribute("dialogId");
+
+	dialogWindow.open(dialogWindow);
+	dialogWindow.setTitle(`Editing dialog in ${scene.name}`, dialogWindow.id);
+	dialogWindow.window_html(ui.parent.outerHTML, dialogWindow.id);
+
+	let charNameBox = dialogWindow.getFromContent(".dialogSetup > .characterName > .labelBox > .inputBox", dialogWindow.id);
+	let dialogText = dialogWindow.getFromContent(".dialogSetup > .dialogTextParent > .labelBox > .inputBox", dialogWindow.id);
+	let timeoutText = dialogWindow.getFromContent(".dialogSetup > .timeoutText > .labelBox > .inputBox", dialogWindow.id);
+
+	charNameBox.value = sceneDialog.name == undefined ? "" : sceneDialog.name;
+	dialogText.value = sceneDialog.text == undefined ? "" : sceneDialog.text;
+	timeoutText.value = sceneDialog.timeout == undefined ? "" : sceneDialog.timeout;
+
+	dialogWindow.getFromContent(".dialogSetup > .dialogSaveButton", dialogWindow.id).onclick = () => {
+		if (charNameBox.value.trim() != "") sceneDialog.name = charNameBox.value;
+		else sceneDialog.name = undefined;
+
+		sceneDialog.timeout = timeoutText.value.trim() == "" ? undefined : parseInt(timeoutText.value);
+
+		sceneDialog.text = dialogText.value;
+
+		dialogsSync(scene.dialogs, setupWindow.getFromContent(".setupUIRoot > .dialogSetupArticle", setupWindow.id), scene, setupWindow);
+	}
+}
+
+const dialogsSync = (dialogs, element, scene, thisWindow) => {
+	let idGenerator = makeId();
+	element.innerHTML = "";
+
+	dialogs.map(dialog => {
+		element.appendChild(makeDialogArticle(dialog.name == undefined || dialog.name.trim() == "" ? "prev character" : dialog.name, idGenerator.next().value));
+	});
+
+	 [...element.querySelectorAll(".dialogArticleOne")].forEach((dialogArticle, idx) => {
+		dialogArticle.querySelector(".openDialogButton").onclick = () => {
+			openDialog(dialogArticle, scene, scene.dialogs[idx], thisWindow);
+		}
+	});
+}
+
+function* makeId() {
+	let id = 0;
+
+	while (true) {
+		yield id++;
+	}
+}
+
+
+buttonsSetup(NewSceneButton, NewSequenceButton, LoadImageButton);

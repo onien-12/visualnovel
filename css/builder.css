@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
+html, body, * {
+	padding: 0;
+	margin: 0;
+
+	font-family: 'Montserrat', sans-serif;
+
+	-ms-overflow-style: none;  /* IE and Edge */
+	scrollbar-width: none;  /* Firefox */
+
+}
+
+html::webkit-scrollbar, body::webkit-scrollbar, *::-webkit-scrollbar {
+  display: none;
+}
+
+header {
+	height: 40px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+header > .buttons {
+	position: absolute;
+	
+	width: 100%;
+
+	display: flex;
+	justify-content: space-evenly;
+}
+
+.main {
+	position: absolute;
+
+	height: auto;
+	width: 100%;
+}
+
+.scenes {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.scene {
+	margin: 5px;
+	padding: 5px;
+
+	flex: 1 0 18%;
+
+	display: flex;
+	flex-direction: column;
+
+	border: 1px solid navy;
+	border-radius: 8px;
+}
+
+.sceneName {
+	font-weight: bold;
+}
+
+.sceneActions {
+	font-size: 14px;
+	margin-bottom: 10px;
+}
+
+.newDialogButton {
+	margin-top: 5px;
+}
+
+.dialogSetupArticle {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.dialogArticleOne {
+	margin: 5px;
+	padding: 5px;
+
+	display: flex;
+	flex-direction: column;
+	flex: 1 0 30%;
+
+	border: 1px solid navy;
+	border-radius: 8px;
+}
+
+button.navy.btn:hover {
+	background-color: #0000b3;
+}
+
+input {
+	transition: all 0.2s;
+	border-radius: 4px;
+	outline: none;
+	padding-left: 5px;
+}
+
+/* COLORS */
+
+.sprites {
+	margin-right: 20px;
+	margin-left: 20px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.navy {
+	background-color: navy
+}
+
+.spriteArticle {
+	display: flex;
+	flex-direction: column;
+	flex: 1 0 18%;
+
+	border: 1px solid navy;
+	border-radius: 8px;
+
+	margin: 5px;
+}
+
+.spriteArticle > label {
+	margin-left: 5px;
+	font-size: 18px;
+}
+
+.spriteArticle > button {
+	margin: 5px;
+}
+
+.spriteSelected {
+	border: 1px solid violet;
+	border-radius: 3px;
+}
