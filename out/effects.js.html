@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: effects.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: effects.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/** Effects controller
+ * @module Effects
+ * @author Onien
+ */
+
+/** Effects main class
+ * @class Effects
+ */
+
+export default class Effects {
+    /** @member {HTMLElement} element
+     * @desc element
+     */
+
+    /** @member {Object} effects
+     * @desc effects object
+     */
+
+    /** @member {Function} effects.dim
+     * @desc dim function
+     */
+
+    /** @member {Function} effects.opacity
+     * @desc opacity function
+     */
+
+    /** @function constructor
+     * @desc inits effects
+     * @param {HTMLElement} element - which element will be controlled
+     */
+    constructor(element) {
+        this.element = element;
+        this.effects = {
+            dim: this.dim,
+            opacity: this.opacity
+        }
+    }
+
+    /** @method dim
+     * @desc handles dim effect: it blacks the element and after that shows it again
+     * @param {number} time
+     * @param {string} easing - css transition easing
+     * @param {number} timeout - timeout before showing
+     * @param {object} styles - css styles
+     * @param {HTMLElement} [element=this.element]
+     * @param {Function} [beforeShow]
+     */
+
+    dim(time, easing, timeout, styles, element = this.element, beforeShow = () => {}) {
+        let reverse = false;
+
+        element.style.display = "block";
+        element.style.backgroundColor = "black";
+
+        element.style.transition = `all ${time.toString()}s ${easing}`;
+        Object.assign(element.style, styles);
+
+        setTimeout(() => element.style.opacity = 1, 15); // without timeout doesnt work
+
+        element.addEventListener("transitionend", () => {
+            beforeShow();
+
+            if (reverse == true) {
+                element.style.display = "none";
+                return element.style.background = "none";
+            }
+            setTimeout(() => {
+                element.style.opacity = 0;
+                reverse = true;
+            }, timeout);
+        });
+    }
+
+    /** @method opacity
+     * @desc handles opacity effect
+     * @param {number} time
+     * @param {string} easing - css transition easing
+     * @param {?number} timeout
+     * @param {object} styles - css styles
+     * @param {HTMLElement} element
+     */
+    opacity(time, easing, timeout, styles, element) {
+        element.style.opacity = 0;
+        element.style.transition = `all ${time.toString()}s ${easing}`;
+        Object.assign(element.style, styles);
+        setTimeout(() => element.style.opacity = 1, 15); // without timeout doesnt work
+    }
+
+
+    /** @method handleEffect
+     * @desc handles effect by its name.
+     * @see {@link Effects#dim}
+     * @see {@link Effects#opacity}
+     * @param {string} name - effect name
+     * @param {number} time
+     * @param {string} easing
+     * @param {number} timeout
+     * @param {object} styles
+     * @param {HTMLElement} element
+     */
+    handleEffect(name, time, easing, timeout, styles, element = this.element) {
+        return this.effects[name](time, easing, timeout, styles, element);
+    }
+
+    /** @method anyEffect
+     * @desc just applies css
+     * @param {HTMLElement} element
+     * @param {object} event - event
+     * @param {number} event.time - time
+     * @param {string} event.easing - css easing
+     * @param {object} event.style - css styles
+     * @param {Function} end
+     */
+    anyEffect(element, event, end = () => {}) {
+            element.style.transition = `all ${event.time.toString()}s ${event.easing == undefined ? '' : event.easing}`; // setting css transition
+            setTimeout(() => Object.assign(element.style, event.styles), 15); // assign styles
+            element.addEventListener("transitionend", () => { // on transition end
+                    element.style.transition = ""; // clear transition		
+                    end.call(this, element, event.styles);
+            });
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Choises.html">Choises</a></li><li><a href="module-Effects.html">Effects</a></li><li><a href="module-Engine.html">Engine</a></li><li><a href="module-Images.html">Images</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-Parser.html">Parser</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Text.html">Text</a></li></ul><h3>Namespaces</h3><ul><li><a href="config.html">config</a></li></ul><h3>Classes</h3><ul><li><a href="module-Choises-Choises.html">Choises</a></li><li><a href="module-Effects-Effects.html">Effects</a></li><li><a href="module-Engine-Engine.html">Engine</a></li><li><a href="module-Images-Images.html">Images</a></li><li><a href="module-Media-Media.html">Media</a></li><li><a href="module-Sound-Sound.html">Sound</a></li><li><a href="module-Text-Text.html">Text</a></li></ul><h3>Global</h3><ul><li><a href="global.html#arrayRemove">arrayRemove</a></li><li><a href="global.html#color">color</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jun 23 2022 18:20:43 GMT+1000 (Vladivostok Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
