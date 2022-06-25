@@ -15,6 +15,12 @@ import {
     color
 } from "./js/utils.js"
 
+// ------------------------------------------------------
+//                                                      |
+// You can see media example in the "scenario.js" file  |
+//                                                      |
+// ------------------------------------------------------
+
 export let scenario = {
     main: [ // branch name: main
         {
@@ -90,7 +96,7 @@ export let scenario = {
             text: "[w] Так."
         },
         {
-            text: "[w] Отсюда надо выбираться."
+            text: "[w] Отсюда надо { text='hello', background='red' }. { <varible name> }"
         },
         {
             text: "[w] Своими соплями ничего не добьюсь!",
@@ -112,13 +118,13 @@ export let scenario = {
                         }
                       },
                       branch: { // setting branch
-                        set: "dontknow" // setting branch
+                        set: "somebranch" // setting branch
                       }
                     },
-                    // mouseenter: {
-                      // text: "bad mouseenter!",
-                      // name: "wowo mouseenter!"
-                    // }
+                    mouseenter: { // if mouse is over choise element
+                        text: "mouseover!",
+                        name: "mouseover btw"
+                    }
                   }
                 },
                 {
@@ -126,30 +132,24 @@ export let scenario = {
                   text: "hezasd",
                   active: true,
                   hidden: false,
-                  // hideChoisesElement: false, // if you dont want to hide choises parent element
                   do: {
                     process: {
-                      // removeChoise: true, // if you want to remove choise user clicked
                       text: "good",
                       name: "good",
                       varibles: {
                         lp: {
                           increment: 35
                         }
+                      },
+                      branch: {
+                        set: "notexists" // error
                       }
-                    },
-                    mouseenter: {
-                      removeChoise: true, // if you want to remove choise under mouse
-                      text: "good mouseenter"
                     }
                   }
                 }
               ],
               other: {
-                hideUIAtChoises: true, // will text and name ui be hidden at choise
-                dontStopText: true, // engine is stopping text typing at new dialog, but you can disable it
-                stopTypingAtChoises: true, // will text typing stop at choise
-                clearSprites: true // I already explained
+                hideUIAtChoises: true // will text and name ui be hidden at choise
               }
         },
         {
@@ -258,19 +258,6 @@ export let scenario = {
     somebranch: [
         {
             text: "hello from new branch"
-        }
-    ],
-    dontknow: [
-        {
-          text: "hello from brach dontknow akj lkjhsh",
-          name: "wowowo dontknow branch",
-          next: true
-        },
-        { // after typing, go to main branch again
-          branch: {
-            set: "main",
-            cursor: 1
-          }
         }
     ]
 }
