@@ -206,11 +206,11 @@ export default class Engine {
             this.handlers.Text.type(
               dialog.text.replace("[w]", ""),
               this.dialogElement.innerHTML,
-              () => this.onTypingEnd()
+              () => this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, Object.fromEntries(this.varibles)
             );
           } else
             this.typingInterval = this.handlers.Text.type(dialog.text, "", () =>
-              this.onTypingEnd()
+              this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, Object.fromEntries(this.varibles)
             ); // type text
         }
 
@@ -225,6 +225,42 @@ export default class Engine {
             dialog.background.src,
             dialog.background.transition
           ); // change background
+        }
+        if (dialog.varibles != undefined) {
+          Object.keys(dialog.varibles).forEach((varible) => {
+            let actions = dialog.varibles[varible];
+
+            if (!this.varibles.has(varible)) { // creating then
+              this.varibles.set(varible, 0);
+            }
+
+            Object.keys(actions).forEach(action => {
+              let value = actions[action];
+
+              if (action == "set") {
+                this.varibles.set(varible, value);
+              }
+              else if (action == "increment") {
+                this.varibles.set(varible, this.varibles.get(varible) + value);
+              }
+              else if (action == "decrement") {
+                this.varibles.set(varible, this.varibles.get(varible) - value);
+              }
+              else if (action == "multiply") {
+                this.varibles.set(varible, this.varibles.get(varible) * value);
+              }
+              else if (action == "divide") {
+                this.varibles.set(varible, this.varibles.get(varible) / value);
+              }
+              // string functions
+              else if (action == "conc") {
+                this.varibles.set(varible, this.varibles.get(varible) + value);
+              }
+              else if (action == "remove") {
+                this.varibles.set(varible, this.varibles.get(varible).replace(value, ""));
+              }
+            });
+          });
         }
         if (dialog.sprites != undefined) {
           if (
@@ -356,7 +392,12 @@ export default class Engine {
         if (dialog.media != undefined) {
           Object.keys(dialog.media).forEach((media) => {
             let values = dialog.media[media];
-            this.handlers.Media.addMedia({ ...values, name: media });
+            this.handlers.Media.addMedia({ ...values, name: media, onend: (options, element) => {
+              if (!values.ended) return;
+
+              if (values.ended.removeMedia) element.remove();
+              if (values.ended.do) this.next(0, values.ended.do);
+            } });
           });
         }
         if (dialog.choises != undefined) { // processing choises
@@ -396,42 +437,6 @@ export default class Engine {
               this.next(0, choiseObj.do.mouseenter);
             }
           }
-        }
-        if (dialog.varibles != undefined) {
-          Object.keys(dialog.varibles).forEach((varible) => {
-            let actions = dialog.varibles[varible];
-
-            if (!this.varibles.has(varible)) { // creating then
-              this.varibles.set(varible, 0);
-            }
-
-            Object.keys(actions).forEach(action => {
-              let value = actions[action];
-
-              if (action == "set") {
-                this.varibles.set(varible, value);
-              }
-              else if (action == "increment") {
-                this.varibles.set(varible, this.varibles.get(varible) + value);
-              }
-              else if (action == "decrement") {
-                this.varibles.set(varible, this.varibles.get(varible) - value);
-              }
-              else if (action == "multiply") {
-                this.varibles.set(varible, this.varibles.get(varible) * value);
-              }
-              else if (action == "divide") {
-                this.varibles.set(varible, this.varibles.get(varible) / value);
-              }
-              // string functions
-              else if (action == "conc") {
-                this.varibles.set(varible, this.varibles.get(varible) + value);
-              }
-              else if (action == "remove") {
-                this.varibles.set(varible, this.varibles.get(varible).replace(value, ""));
-              }
-            });
-          });
         }
         if (dialog.branch != undefined) {
           if (dialog.branch.set != undefined) {

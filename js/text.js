@@ -69,11 +69,12 @@ export default class Text {
      * @param {Function} [after] - will be executed after all text typed
      * @param {HTMLElement} [element]
      * @param {number} [speed=config.speed] - typing speed
+     * @param {Object} [parserData={}]
      * @returns {number} interval
      */
 
-    type(text,  added = "", after = () => {}, element = this.textEl, speed = this.config.speed) {
-        text = added + parse(text, {}, {useDOM: true});
+    type(text,  added = "", after = () => {}, element = this.textEl, speed = this.config.speed, parserData = {}) {
+        text = added + parse(text, parserData, {useDOM: true});
 
         this.textToType = text;
 

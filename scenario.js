@@ -51,6 +51,7 @@ export let scenario = {
                   divide: 2, // 3-d
                   increment: 3, // 4-th
                   decrement: 2 // 5-th
+                  // result = 2.5
                 }
               },
               branch: { // setting branch
@@ -96,7 +97,7 @@ export let scenario = {
         instantly: true,
         increment: 1,
       },
-      text: "это большой текст с поддержкой { text='html', color='red' } и я очень надеюсь, что это всё работает { text='нормально', color='green', background='white' }!",
+      text: "это большой текст с поддержкой { text='html', color='red' } и я очень надеюсь, что это всё работает { text='нормально', color='green', background='white' }! LP: { text=lp, color='yellow' }",
       name: "Весь мир",
       events: {
         sprites: {
@@ -121,6 +122,12 @@ export let scenario = {
           attrs: {
             autoplay: "true"
           },
+          ended: {
+            removeMedia: true, // if you want to remove media element after end
+            do: {
+              text: "video ended"
+            }
+          } 
         },
       },
     },
@@ -142,7 +149,16 @@ export let scenario = {
         sprites: {
           durak: {
             changePose: "sprite",
-            effect: false
+            effect: true,
+            time: 5,
+            easing: "linear",
+            stylesBefore: {
+              backgroundSize: "100% 100%"
+            },
+            styles: {
+              width: "300px",
+              height: "500px"
+            }
           }
         },
         media: {

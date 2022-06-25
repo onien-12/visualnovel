@@ -7,6 +7,12 @@ import {
     color
 } from "./js/utils.js"
 
+// ------------------------------------------------------
+//                                                      |
+// You can see media example in the "scenario.js" file  |
+//                                                      |
+// ------------------------------------------------------
+
 export let scenario = {
     main: [ // branch name: main
         {
@@ -82,7 +88,7 @@ export let scenario = {
             text: "[w] Так."
         },
         {
-            text: "[w] Отсюда надо выбираться."
+            text: "[w] Отсюда надо { text='hello', background='red' }. { <varible name> }"
         },
         {
             text: "[w] Своими соплями ничего не добьюсь!",

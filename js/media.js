@@ -52,6 +52,10 @@ export default class Media {
       video.setAttribute("src", options.src);
       this.element.appendChild(ParentVideo);
 
+      video.onended = () => {
+        if (options.onend) options.onend.call(this, options, video);
+      }
+
       if (options.styles != undefined)
         Object.assign(ParentVideo.style, options.styles);
       if (options.transition != undefined) {

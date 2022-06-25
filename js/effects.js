@@ -108,10 +108,13 @@ export default class Effects {
      * @param {object} event - event
      * @param {number} event.time - time
      * @param {string} event.easing - css easing
-     * @param {object} event.style - css styles
+     * @param {object} event.styles - css styles
+     * @param {?object} event.stylesBefore - css styles before transition
      * @param {Function} end
      */
     anyEffect(element, event, end = () => {}) {
+            if (event.stylesBefore)
+                Object.assign(element.style, event.stylesBefore);
             element.style.transition = `all ${event.time.toString()}s ${event.easing == undefined ? '' : event.easing}`; // setting css transition
             setTimeout(() => Object.assign(element.style, event.styles), 15); // assign styles
             element.addEventListener("transitionend", () => { // on transition end
