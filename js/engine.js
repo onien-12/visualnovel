@@ -11,8 +11,8 @@ import Media from "./media.js";
 import Choises from "./choises.js";
 
 /** Main Engine class. See {@tutorial scenario-example}
-  * @class Engine
-  */
+ * @class Engine
+ */
 
 export default class Engine {
   /** @member {Object} handlers
@@ -34,8 +34,8 @@ export default class Engine {
   /** @member {HTMLElement} choisesElement */
 
   /** @member {Object[]} registered
-    * @desc there will be all dialogs
-    */
+   * @desc there will be all dialogs
+   */
 
   /** @member {number} readingIndex
    * @desc current dialog
@@ -214,7 +214,7 @@ export default class Engine {
             ); // type text
         }
 
-        
+
         if (dialog.name != undefined) {
           // if name changed
           this.handlers.Text.setName(dialog.name); // change name
@@ -297,14 +297,14 @@ export default class Engine {
                 HTMLElement.style.transition = `all ${sprite.transition.time}s ${sprite.transition.easing}`;
                 setTimeout(
                   () =>
-                    Object.assign(HTMLElement.style, sprite.transition.styles),
+                  Object.assign(HTMLElement.style, sprite.transition.styles),
                   15
                 );
               }
               this.sprites.set(spriteName, {
-                    sprite: sprite,
-                    element: HTMLElement
-                });
+                sprite: sprite,
+                element: HTMLElement
+              });
             };
 
           });
@@ -323,11 +323,11 @@ export default class Engine {
               }
 
               if (event.effect == true || event.effect == undefined) {
-                  this.handlers.Effects.anyEffect(element, event, () => {
-                    if (event.remove) {
-                      element.remove();
-                    }
-                  });
+                this.handlers.Effects.anyEffect(element, event, () => {
+                  if (event.remove) {
+                    element.remove();
+                  }
+                });
               }
             });
           }
@@ -350,13 +350,21 @@ export default class Engine {
               let element = document.querySelector(
                 `.media[mediaName=${mediaEvent}]`
               ); // getting media element
-              this.handlers.Effects.anyEffect(element, event, () => {
-                // and applying effect
-                if (event.remove) {
-                  // if remove after effect ending
-                  element.remove(); // removing
-                }
-              });
+              if (event.pause) {
+                element.querySelector("video").pause();
+              }
+              if (event.play) {
+                element.querySelector("video").play();
+              }
+              if (event.time && event.styles) {
+                this.handlers.Effects.anyEffect(element, event, () => {
+                  // and applying effect
+                  if (event.remove) {
+                    // if remove after effect ending
+                    element.remove(); // removing
+                  }
+                });
+              }
             });
           }
         }
@@ -395,7 +403,7 @@ export default class Engine {
             this.handlers.Media.addMedia({ ...values, name: media, onend: (options, element) => {
               if (!values.ended) return;
 
-              if (values.ended.removeMedia) element.remove();
+              if (values.ended.removeMedia) element.parentNode.remove();
               if (values.ended.do) this.next(0, values.ended.do);
             } });
           });
@@ -412,15 +420,17 @@ export default class Engine {
           }
           let choise = new Choises(dialog.choises);
           let builded = choise.build();
-          
+
           this.choisesElement.appendChild(builded);
+
+          this.choisesElement.hidden = false;
 
           choise.onSelect = (choiseObj, element) => {
             if (choiseObj.hideChoisesElement == undefined || choiseObj.hideChoisesElement) {
               this.choisesElement.hidden = true;
-              this.choisesElement.querySelector(".choisesParent").innerHTML = "";
+              this.choisesElement.querySelector(".choisesParent").remove();
             }
-            
+
             if (choiseObj.do.process != undefined) {
               if (choiseObj.do.removeChoise != undefined && choiseObj.do.removeChoise) {
                 element.remove();

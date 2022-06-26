@@ -36,61 +36,6 @@ export let scenario = {
       background: {
         src: "../images/mountains.jpg",
       },
-      choises: [
-        {
-          name: "bad", // just a name for choise. It will not display
-          text: "haha", // text (html)
-          active: true, // if user can choise if
-          hidden: false, // if it visible
-          do: { // do if chosen
-            process: { // process (Engine#next)
-              varibles: { // setting variblesd
-                lp: { // varibles reading action-by-action: if first is set to 5, second is increment by 4 and third is decrement by 7, then result will be = 2 ( 5 + 4 - 7 )
-                  increment: 1, // first action
-                  multiply: 3, // 2-d
-                  divide: 2, // 3-d
-                  increment: 3, // 4-th
-                  decrement: 2 // 5-th
-                  // result = 2.5
-                }
-              },
-              branch: { // setting branch
-                set: "dontknow" // setting branch
-              }
-            },
-            // mouseenter: {
-              // text: "bad mouseenter!",
-              // name: "wowo mouseenter!"
-            // }
-          }
-        },
-        {
-          name: "good",
-          text: "hezasd",
-          active: true,
-          hidden: false,
-          // hideChoisesElement: false, // if you dont want to hide choises parent element
-          do: {
-            process: {
-              // removeChoise: true, // if you want to remove choise user clicked
-              text: "good",
-              name: "good",
-              varibles: {
-                lp: {
-                  increment: 35
-                }
-              }
-            },
-            mouseenter: {
-              removeChoise: true, // if you want to remove choise under mouse
-              text: "good mouseenter"
-            }
-          }
-        }
-      ],
-      other: {
-        hideUIAtChoises: true // will text and name ui be hidden at choise
-      }
     },
     {
       next: {
@@ -169,11 +114,72 @@ export let scenario = {
               opacity: "0.5",
             },
             time: 0.5,
+            pause: true,
+            // or play: true
           },
         },
       },
+      choises: [
+        {
+          name: "bad", // just a name for choise. It will not display
+          text: "haha", // text (html)
+          active: true, // if user can choise if
+          hidden: false, // if it visible
+          do: { // do if chosen
+            process: { // process (Engine#next)
+              varibles: { // setting variblesd
+                lp: { // varibles reading action-by-action: if first is set to 5, second is increment by 4 and third is decrement by 7, then result will be = 2 ( 5 + 4 - 7 )
+                  increment: 1, // first action
+                  multiply: 3, // 2-d
+                  divide: 2, // 3-d
+                  increment: 3, // 4-th
+                  decrement: 2 // 5-th
+                  // result = 2.5
+                }
+              },
+              branch: { // setting branch
+                set: "dontknow" // setting branch
+              }
+            },
+            // mouseenter: {
+            // text: "bad mouseenter!",
+            // name: "wowo mouseenter!"
+            // }
+          }
+        },
+        {
+          name: "good",
+          text: "hezasd",
+          active: true,
+          hidden: false,
+          // hideChoisesElement: false, // if you dont want to hide choises parent element
+          do: {
+            process: {
+              // removeChoise: true, // if you want to remove choise user clicked
+              text: "good",
+              name: "good",
+              varibles: {
+                lp: {
+                  increment: 35
+                }
+              }
+            },
+            mouseenter: {
+              removeChoise: true, // if you want to remove choise under mouse
+              text: "good mouseenter"
+            }
+          }
+        }
+      ],
+      other: {
+        hideUIAtChoises: true // will text and name ui be hidden at choise
+      }
     },
-  ], // все в виде массива
+    {
+      text: "really",
+      name: "i dont know"
+    }
+  ], 
   dontknow: [
     {
       text: "hello from brach dontknow akj lkjhsh",
@@ -184,6 +190,13 @@ export let scenario = {
       branch: {
         set: "main",
         cursor: 1
+      },
+      events: {
+        media: {
+          what: {
+            play: true
+          }
+        }
       }
     }
   ]
