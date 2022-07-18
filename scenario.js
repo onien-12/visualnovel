@@ -70,7 +70,9 @@ export let scenario = {
           ended: {
             removeMedia: true, // if you want to remove media element after end
             do: {
-              text: "video ended"
+              branch: {
+                set: "videoended"
+              }
             }
           } 
         },
@@ -182,14 +184,14 @@ export let scenario = {
   ], 
   dontknow: [
     {
-      text: "hello from brach dontknow akj lkjhsh",
+      text: "[w] hello from brach dontknow akj lkjhsh",
       name: "wowowo dontknow branch",
       next: true
     },
     {
       branch: {
         set: "main",
-        cursor: 1
+        cursor: 4
       },
       events: {
         media: {
@@ -197,6 +199,16 @@ export let scenario = {
             play: true
           }
         }
+      }
+    }
+  ],
+  videoended: [
+    {
+      text: "video actually ended"
+    },
+    {
+      branch: {
+        set: "dontknow"
       }
     }
   ]

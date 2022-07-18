@@ -7,10 +7,10 @@
  * @returns {{type: type, disable: disable}}
  */
 
-export function setupTypewriter(html, t, after, speed) {
+export function setupTypewriter(html, t, after, speed, added = "") {
       var HTML = html;
 
-      t.innerHTML = "";
+      t.innerHTML = added;
 
       var cursorPosition = 0,
           tag = "",

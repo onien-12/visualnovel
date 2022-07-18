@@ -22,7 +22,7 @@ document.onkeyup = (event) => {
             engine.typing = false;
             return engine.handlers.Text.set(engine.handlers.Text.textToType);
         }
-        engine.readingIndex++;
+        engine.index++;
         engine.next();
     }
 }

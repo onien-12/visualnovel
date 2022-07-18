@@ -163,15 +163,16 @@ export default class Engine {
    * @returns {Object} processed dialog
    */
 
-  next(index = this.readingIndex, dialog = null) {
+  next(index = this.index, dialog = null) {
     if (dialog == null) 
-      if (this.readingIndex == this.registered[this.branchReading].length) return; // if end reached
+      if (this.index == this.registered[this.branch].length) return; // if end reached
 
     this.typing = true;
+    
     this.textElement.style.display = "block";
 
     if (dialog == null)
-      dialog = this.registered[this.branchReading][this.readingIndex]; // this dialog
+      dialog = this.registered[this.branch][this.index]; // this dialog
 
     if (!dialog.other?.dontStopText)
       this.typingInterval?.disable();
@@ -350,10 +351,10 @@ export default class Engine {
               let element = document.querySelector(
                 `.media[mediaName=${mediaEvent}]`
               ); // getting media element
-              if (event.pause) {
+              if (event.pause && element) {
                 element.querySelector("video").pause();
               }
-              if (event.play) {
+              if (event.play && element) {
                 element.querySelector("video").play();
               }
               if (event.time && event.styles) {
@@ -452,7 +453,7 @@ export default class Engine {
           if (dialog.branch.set != undefined) {
             this.branch = dialog.branch.set;
             if (dialog.branch.cursor != undefined) {
-              this.readingIndex = dialog.branch.cursor;
+              this.index = dialog.branch.cursor;
             }
             this.next();
           }
@@ -471,5 +472,19 @@ export default class Engine {
       this.readingIndex = 0;
     }
     else throw new Error("Cannot set branch " + value + ". Branch not found");
+  }
+
+  get branch() {
+    return this.branchReading;
+  }
+
+  set index(value) {
+    if (this.index == this.registered[this.branch].length) throw new Error("Cannot set index " + value + ". End reached in branch " + this.branch); // if end reached
+
+    this.readingIndex = value;
+  }
+
+  get index() {
+    return this.readingIndex;
   }
 }

@@ -74,11 +74,11 @@ export default class Text {
      */
 
     type(text,  added = "", after = () => {}, element = this.textEl, speed = this.config.speed, parserData = {}) {
-        text = added + parse(text, parserData, {useDOM: true});
+        text = parse(text, parserData, {useDOM: true});
 
         this.textToType = text;
 
-        let typewriter = setupTypewriter(text, element, after, speed);
+        let typewriter = setupTypewriter(text, element, after, speed, added);
         typewriter.type();
 
         return typewriter;
