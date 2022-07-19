@@ -46,6 +46,9 @@ export let scenario = {
             }
           }
         }
+      },
+      js: (dialog) => { // this function will execute. There is 1 argument - current dialog. But if you use `function () { <code> }`, you can use <this> keyword and get engine
+        console.log("hello from js");
       }
     },
     {
@@ -206,6 +209,25 @@ export let scenario = {
     {
       text: "really",
       name: "i dont know"
+    },
+    {
+      repeat: {
+        times: 15, // set how many times we need to repeat <do> section
+        do: { // what we need to repeat
+          varibles: { // just increment (lp) varible
+            lp: {
+              increment: 1
+            }
+          },
+          js: (dialog, { iteration }) => {
+            console.log("yea " + iteration);
+          }
+        },
+        after: { // after loop ended
+          text: "you now have { lp } LP"
+        },
+        "async": true // if true, all loop will be async (wrapped into setInterval)
+      } // repeat 5 times
     }
   ], 
   dontknow: [
@@ -276,6 +298,12 @@ export let scenario = {
       text: "video actually ended"
     },
     {
+      timeout: {
+        duration: 500, // 500 ms
+        doInstantly: { // do before timeout (instantly)
+          text: "[w] really"
+        }
+      },
       branch: {
         set: "dontknow"
       }

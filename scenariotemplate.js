@@ -229,6 +229,15 @@ export let scenario = {
         },
         {
             timeout: 200, // start processing this dialog after 200 ms
+            // also, you can use additional timeout settings
+            /*
+             timeout: {
+                duration: 200, // 200ms timeout
+                doInstantly: {
+                    text: "[w] this was without timeout" // do before timeout. Instantly
+                }
+             },
+            */
             text: "[w] туда" // and typing after delay
         },
         {

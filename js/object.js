@@ -5,7 +5,7 @@
 
 import { parse } from "./parser.js";
 
-/** @ class SceneObject
+/** @class SceneObject
  * @desc creates objects 
  * @param {HTMLElement} scene - parent object
  * @param {Object} config - config object

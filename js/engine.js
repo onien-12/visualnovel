@@ -166,10 +166,11 @@ export default class Engine {
    * @desc processes dialog from Engine#registered under index (index)
    * @param {number} [index=Engine#readingIndex]
    * @param {Object} [?dialog=null]
+   * @param {Object} [additionalJSArguments={}] you can use js in your scenario. To use another varibles in this functions, you can fill thia array
    * @returns {Object} processed dialog
    */
 
-  next(index = this.index, dialog = null) {
+  next(index = this.index, dialog = null, additionalJSArguments = {}) {
     if (dialog == null) 
       if (this.index == this.registered[this.branch].length) return; // if end reached
 
@@ -504,8 +505,35 @@ export default class Engine {
         }
         document.querySelector(".count").innerText = this.readingIndex + "; " + this.branchReading;
       },
-      dialog.timeout == undefined ? 1 : dialog.timeout
+      !dialog.timeout ? 0 : (typeof dialog.timeout == "number" ? dialog.timeout : dialog.timeout.duration)
     );
+
+    if (dialog.timeout && typeof dialog.timeout == "object" && dialog.doInstantly) {
+      this.next(0, dialog.timeout.doInstantly);
+    }
+
+    if (dialog.repeat) {
+      if (dialog.repeat.async) {
+        let i = 0;
+        let interval = setInterval(() => { 
+          if (i >= dialog.repeat.times) {
+            clearInterval(interval);
+            if (dialog.repeat.after) this.next(0, dialog.repeat.after, {...additionalJSArguments, iteration: i, after: true});
+            return;
+          }
+          this.next(0, dialog.repeat.do, {...additionalJSArguments, iteration: i, after: false}); 
+          i++;
+        });
+      }
+      else {
+        for (let i = 0; i < dialog.repeat.times; i++) this.next(0, dialog.repeat.do, {...additionalJSArguments, iteration: i, after: false});
+        if (dialog.repeat.after) this.next(0, dialog.repeat.after, {...additionalJSArguments, iteration: dialog.repeat.times, after: true});
+      }
+    }
+
+    if (dialog.js) {
+      dialog.js.call(this, dialog, additionalJSArguments);
+    }
 
     return dialog;
   }
