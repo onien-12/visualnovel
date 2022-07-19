@@ -279,4 +279,4 @@ Template scenario you can find in root directory "scenariotemplate.js" <br><br>
 - [ ] Finish the builder
 - [X] Scenario branches
 - [ ] Conditions
-- [ ] In-scene objects (like text or blocks)
+- [X] In-scene objects (like text or blocks)
