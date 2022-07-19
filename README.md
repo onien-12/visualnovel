@@ -15,11 +15,12 @@ import {
     color
 } from "./js/utils.js"
 
-// ───────────────────────────────────────────────────────────────────────┐
-//                                                                        │
-// You can see media (video and sound) example in the "scenario.js" file  │
-//                                                                        │
-// ───────────────────────────────────────────────────────────────────────┘
+// ┌───────────────────────────────────────────────────────────────────────┐
+// │                                                                       │
+// │ You can see media (video and sound) example in the "scenario.js" file │
+// │ Also, in-scene objects (text and blocks) you can find there           │
+// │                                                                       │
+// └───────────────────────────────────────────────────────────────────────┘
 
 export let scenario = {
     main: [ // branch name: main
