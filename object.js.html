@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Sound</title>
+    <title>JSDoc: Source: object.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,138 +17,78 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Sound</h1>
+    <h1 class="page-title">Source: object.js</h1>
 
     
 
 
 
-
-<section>
-
-<header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>
-            <span class="ancestors"><a href="module-Sound.html">Sound</a>~</span>Sound<span class="signature">()</span><span class="type-signature"></span></h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-    
-
-    
-    <h4 class="name" id="Sound"><span class="type-signature"></span>new Sound<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Sound main class
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sound.js.html">sound.js</a>, <a href="sound.js.html#line7">line 7</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { parse } from "./parser.js";
+
+/** @ class SceneObject
+ * @desc creates objects 
+ * @param {HTMLElement} scene - parent object
+ * @param {Object} config - config object
+ * @param {string} [config.tag] - tag name of new html element. if not set, it defaults &lt;div> tag
+ * @param {string[]} [config.class] - classes to add to new element. if not set, it defaults nothing
+ * @param {string} [config.id] - id of the element. if not set, it defaults nothing ("")
+ * @param {Object} [config.style] - style of the element (element.style html property) 
+ * @param {Map&lt;string, string>} [config.attrs] - html attributes
+ */
+export default class SceneObject {
+    constructor(scene, config) {
+        this.element = document.createElement(config.tag ?? "div"); // if not exists, tag will be &lt;div>
+        this.element.classList.add(...(config.class ?? [])); // if not exists, add nothing
+        this.element.id = config.id ?? ""; // sets id or nothing
+        if (config.style) Object.assign(this.element.style, config.style); // sets styles
+        if (config.attrs) Array.from(config.attrs).map(([key, value]) => this.element.setAttribute(key, value));
+
+        this.scene = scene;
+    }
+
+    /** @method add
+     * @desc adds element to scene
+     */
+
+    add() {
+        this.scene.appendChild(this.element);
+    }
+
+    /** @member classList
+     * @desc setter/getter. sets/gets class list. To set needs array of classes
+     */
+    set classList(list) {
+        this.element.className = "";
+        this.element.classList.add(...list);
+    }
+
+    get classList() {
+        return this.element.classList;
+    }
+
+    /** @member html
+     * @desc getter. gets innerHTML
+     */
+
+    /** @method setHtml
+     * @param {string} html
+     * @param {Object} [parserData] - parser data
+     */
+
+    setHtml(value, parserData = {}) {
+        this.element.innerHTML = parse(value, parserData, {useDOM: true});
+    }
+
+    get html() {
+        return this.element.innerHTML;
+    }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

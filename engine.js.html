@@ -27,7 +27,6 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/** Main engine file
- * @module Engine
  * @author Onien
  */
 
@@ -37,10 +36,11 @@ import Sound from "./sound.js";
 import Text from "./text.js";
 import Media from "./media.js";
 import Choises from "./choises.js";
+import SceneObject from "./object.js"; 
 
 /** Main Engine class. See {@tutorial scenario-example}
-  * @class Engine
-  */
+ * @class Engine
+ */
 
 export default class Engine {
   /** @member {Object} handlers
@@ -62,8 +62,8 @@ export default class Engine {
   /** @member {HTMLElement} choisesElement */
 
   /** @member {Object[]} registered
-    * @desc there will be all dialogs
-    */
+   * @desc there will be all dialogs
+   */
 
   /** @member {number} readingIndex
    * @desc current dialog
@@ -87,6 +87,10 @@ export default class Engine {
 
   /** @member {Map} varibles
    * @desc contains all user-created varibles
+   */
+
+  /** @member {Map&lt;string, SceneObject>} objects
+   * @desc contains all scene objects
    */
 
   /** @member {string} branchReading
@@ -132,6 +136,7 @@ export default class Engine {
     this.typingInterval;
     this.sprites = new Map();
     this.varibles = new Map();
+    this.objects = new Map();
   }
 
   /** @method setTitle
@@ -191,15 +196,16 @@ export default class Engine {
    * @returns {Object} processed dialog
    */
 
-  next(index = this.readingIndex, dialog = null) {
+  next(index = this.index, dialog = null) {
     if (dialog == null) 
-      if (this.readingIndex == this.registered[this.branchReading].length) return; // if end reached
+      if (this.index == this.registered[this.branch].length) return; // if end reached
 
     this.typing = true;
+    
     this.textElement.style.display = "block";
 
     if (dialog == null)
-      dialog = this.registered[this.branchReading][this.readingIndex]; // this dialog
+      dialog = this.registered[this.branch][this.index]; // this dialog
 
     if (!dialog.other?.dontStopText)
       this.typingInterval?.disable();
@@ -234,15 +240,15 @@ export default class Engine {
             this.handlers.Text.type(
               dialog.text.replace("[w]", ""),
               this.dialogElement.innerHTML,
-              () => this.onTypingEnd()
+              () => this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, Object.fromEntries(this.varibles)
             );
           } else
             this.typingInterval = this.handlers.Text.type(dialog.text, "", () =>
-              this.onTypingEnd()
+              this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, Object.fromEntries(this.varibles)
             ); // type text
         }
 
-        
+
         if (dialog.name != undefined) {
           // if name changed
           this.handlers.Text.setName(dialog.name); // change name
@@ -253,177 +259,6 @@ export default class Engine {
             dialog.background.src,
             dialog.background.transition
           ); // change background
-        }
-        if (dialog.sprites != undefined) {
-          if (
-            dialog.other != undefined &amp;&amp;
-            dialog.other.clearSprites != undefined &amp;&amp;
-            dialog.other.clearSprites == true
-          )
-            this.scene.innerHTML = ""; // clear all
-
-          Object.keys(dialog.sprites).forEach((spriteName) => {
-            const sprite = dialog.sprites[spriteName]; // getting sprite
-
-            const img = new Image(); // getting size
-            img.src = sprite.poses[sprite.pose];
-
-            img.onload = () => {
-              let HTMLElement = document.createElement("div"); // adding sprite div
-              HTMLElement.classList.add("image", "sprite"); // class setup
-              HTMLElement.setAttribute("sprite", spriteName); // name
-              this.scene.appendChild(HTMLElement); // adding
-
-              let image = new Images(HTMLElement); // loading sprite
-              image.setAsSprite(sprite.poses[sprite.pose]);
-
-              // -_-_ Setting styles -_-_-
-
-              HTMLElement.style.top = sprite.top;
-              HTMLElement.style.left = sprite.left;
-              HTMLElement.style.width = img.width + "px";
-              HTMLElement.style.height = img.height + "px";
-              if (sprite.styles != undefined)
-                Object.assign(HTMLElement.style, sprite.styles);
-              if (sprite.transition != undefined) {
-                HTMLElement.style.transition = `all ${sprite.transition.time}s ${sprite.transition.easing}`;
-                setTimeout(
-                  () =>
-                    Object.assign(HTMLElement.style, sprite.transition.styles),
-                  15
-                );
-              }
-              this.sprites.set(spriteName, {
-                    sprite: sprite,
-                    element: HTMLElement
-                });
-            };
-
-          });
-        }
-        if (dialog.events != undefined) {
-          if (dialog.events.sprites != undefined) {
-            Object.keys(dialog.events.sprites).forEach((spriteName) => {
-              // exec sprite events
-              const event = dialog.events.sprites[spriteName];
-              const sprite = this.sprites.get(spriteName);
-              let element = sprite.element;
-
-              if (event.changePose != undefined) {
-                let image = new Images(element);
-                image.setAsSprite(sprite.sprite.poses[event.changePose]);
-              }
-
-              if (event.effect == true || event.effect == undefined) {
-                  this.handlers.Effects.anyEffect(element, event, () => {
-                    if (event.remove) {
-                      element.remove();
-                    }
-                  });
-              }
-            });
-          }
-
-          if (dialog.events.effects != undefined) {
-            dialog.events.effects.forEach((effect) => {
-              // exec effects
-              this.handlers.Effects.handleEffect(
-                effect.name,
-                effect.time,
-                effect.easing,
-                effect.timeout,
-                effect.styles
-              );
-            });
-          }
-          if (dialog.events.media != undefined) {
-            Object.keys(dialog.events.media).forEach((mediaEvent) => {
-              const event = dialog.events.media[mediaEvent];
-              let element = document.querySelector(
-                `.media[mediaName=${mediaEvent}]`
-              ); // getting media element
-              this.handlers.Effects.anyEffect(element, event, () => {
-                // and applying effect
-                if (event.remove) {
-                  // if remove after effect ending
-                  element.remove(); // removing
-                }
-              });
-            });
-          }
-        }
-        if (dialog.sounds != undefined) {
-          // if sounds changed
-          Object.keys(dialog.sounds).forEach((soundName) => {
-            let soundObj = dialog.sounds[soundName]; // getting sound options
-            if (!this.sounds[soundName]) {
-              // adding sound to sound array if there is no sound
-              this.sounds[soundName] = new Sound(soundObj.src);
-            }
-            let thisSound = this.sounds[soundName]; // gettung sound from engine
-            thisSound.play(); // starting sound
-            thisSound.loop = soundObj.loop; // if loop
-            if (soundObj.transition) {
-              // if transition
-              return thisSound.transition(
-                soundObj.transition.from,
-                soundObj.transition.to,
-                soundObj.transition.step,
-                soundObj.transition.time,
-                () => {
-                  if (soundObj.stop) {
-                    thisSound.stop();
-                  }
-                }
-              );
-            }
-            if (soundObj.stop) return thisSound.stop();
-            thisSound.volume = soundObj.volume;
-          });
-        }
-        if (dialog.media != undefined) {
-          Object.keys(dialog.media).forEach((media) => {
-            let values = dialog.media[media];
-            this.handlers.Media.addMedia({ ...values, name: media });
-          });
-        }
-        if (dialog.choises != undefined) { // processing choises
-          if (dialog.other != undefined ) {
-            if (dialog.other.stopTypingAtChoises != undefined &amp;&amp; dialog.other.stopTypingAtChoises) {
-              this.typingInterval.disable();
-              this.typing = false;
-            }
-            if (dialog.other.hideUIAtChoises != undefined &amp;&amp; dialog.other.hideUIAtChoises) {
-              this.textElement.style.display = "none";
-            }
-          }
-          let choise = new Choises(dialog.choises);
-          let builded = choise.build();
-          
-          this.choisesElement.appendChild(builded);
-
-          choise.onSelect = (choiseObj, element) => {
-            if (choiseObj.hideChoisesElement == undefined || choiseObj.hideChoisesElement) {
-              this.choisesElement.hidden = true;
-              this.choisesElement.querySelector(".choisesParent").innerHTML = "";
-            }
-            
-            if (choiseObj.do.process != undefined) {
-              if (choiseObj.do.removeChoise != undefined &amp;&amp; choiseObj.do.removeChoise) {
-                element.remove();
-              }
-              this.next(0, choiseObj.do.process);
-            }
-          }
-
-          choise.onMouseEnter = (choiseObj, element) => {
-            if (choiseObj.do.mouseenter != undefined) {
-              if (choiseObj.do.mouseenter.removeChoise != undefined &amp;&amp; choiseObj.do.mouseenter.removeChoise) {
-                element.remove();
-              }
-              this.next(0, choiseObj.do.mouseenter);
-            }
-          }
         }
         if (dialog.varibles != undefined) {
           Object.keys(dialog.varibles).forEach((varible) => {
@@ -461,14 +296,238 @@ export default class Engine {
             });
           });
         }
+        if (dialog.sprites != undefined) {
+          if (
+            dialog.other != undefined &amp;&amp;
+            dialog.other.clearSprites != undefined &amp;&amp;
+            dialog.other.clearSprites == true
+          )
+            this.scene.innerHTML = ""; // clear all
+
+          Object.keys(dialog.sprites).forEach((spriteName) => {
+            const sprite = dialog.sprites[spriteName]; // getting sprite
+
+            const img = new Image(); // getting size
+            img.src = sprite.poses[sprite.pose];
+
+            img.onload = () => {
+              let HTMLElement = document.createElement("div"); // adding sprite div
+              HTMLElement.classList.add("image", "sprite"); // class setup
+              HTMLElement.setAttribute("sprite", spriteName); // name
+              this.scene.appendChild(HTMLElement); // adding
+
+              let image = new Images(HTMLElement); // loading sprite
+              image.setAsSprite(sprite.poses[sprite.pose]);
+
+              // -_-_ Setting styles -_-_-
+
+              HTMLElement.style.top = sprite.top;
+              HTMLElement.style.left = sprite.left;
+              HTMLElement.style.width = img.width + "px";
+              HTMLElement.style.height = img.height + "px";
+              if (sprite.styles != undefined)
+                Object.assign(HTMLElement.style, sprite.styles);
+              if (sprite.transition != undefined) {
+                HTMLElement.style.transition = `all ${sprite.transition.time}s ${sprite.transition.easing}`;
+                setTimeout(
+                  () =>
+                  Object.assign(HTMLElement.style, sprite.transition.styles),
+                  15
+                );
+              }
+              this.sprites.set(spriteName, {
+                sprite: sprite,
+                element: HTMLElement
+              });
+            };
+
+          });
+        }
+        if (dialog.events != undefined) {
+          if (dialog.events.sprites != undefined) {
+            Object.keys(dialog.events.sprites).forEach((spriteName) => {
+              // exec sprite events
+              const event = dialog.events.sprites[spriteName];
+              const sprite = this.sprites.get(spriteName);
+              let element = sprite.element;
+
+              if (event.changePose != undefined) {
+                let image = new Images(element);
+                image.setAsSprite(sprite.sprite.poses[event.changePose]);
+              }
+
+              if (event.effect == true || event.effect == undefined) {
+                this.handlers.Effects.anyEffect(element, event, () => {
+                  if (event.remove) {
+                    element.remove();
+                  }
+                });
+              }
+            });
+          }
+
+          if (dialog.events.effects != undefined) {
+            dialog.events.effects.forEach((effect) => {
+              // exec effects
+              this.handlers.Effects.handleEffect(
+                effect.name,
+                effect.time,
+                effect.easing,
+                effect.timeout,
+                effect.styles
+              );
+            });
+          }
+          if (dialog.events.media != undefined) {
+            Object.keys(dialog.events.media).forEach((mediaEvent) => {
+              const event = dialog.events.media[mediaEvent];
+              let element = document.querySelector(
+                `.media[mediaName=${mediaEvent}]`
+              ); // getting media element
+              if (event.pause &amp;&amp; element) {
+                element.querySelector("video").pause();
+              }
+              if (event.play &amp;&amp; element) {
+                element.querySelector("video").play();
+              }
+              if (event.time &amp;&amp; event.styles) {
+                this.handlers.Effects.anyEffect(element, event, () => {
+                  // and applying effect
+                  if (event.remove) {
+                    // if remove after effect ending
+                    element.remove(); // removing
+                  }
+                });
+              }
+            });
+          }
+
+          if (dialog.events.objects != undefined) {
+            Object.keys(dialog.events.objects).forEach((objectName) => {
+              if (!this.objects.has(objectName)) {
+                throw new Error("Object " + objectName + " not found!");
+              }
+              let object = this.objects.get(objectName);
+              const event = dialog.events.objects[objectName];
+
+              if (event.html) object.setHtml(event.html, Object.fromEntries(this.varibles));
+              if (event.add) object.add();
+
+              this.handlers.Effects.anyEffect(object.element, event, () => {
+                if (event.remove) { 
+                  object.element.remove();
+                  this.object.delete(objectName);
+                }
+              });
+            });
+          }
+        }
+        if (dialog.sounds != undefined) {
+          // if sounds changed
+          Object.keys(dialog.sounds).forEach((soundName) => {
+            let soundObj = dialog.sounds[soundName]; // getting sound options
+            if (!this.sounds[soundName]) {
+              // adding sound to sound array if there is no sound
+              this.sounds[soundName] = new Sound(soundObj.src);
+            }
+            let thisSound = this.sounds[soundName]; // gettung sound from engine
+            thisSound.play(); // starting sound
+            thisSound.loop = soundObj.loop; // if loop
+
+            if (soundObj.ended &amp;&amp; soundObj.ended.do) {
+              thisSound.ended = () => {
+                this.next(0, soundObj.ended.do);
+              }
+            }
+
+            if (soundObj.transition) {
+              // if transition
+              return thisSound.transition(
+                soundObj.transition.from,
+                soundObj.transition.to,
+                soundObj.transition.step,
+                soundObj.transition.time,
+                () => {
+                  if (soundObj.stop) {
+                    thisSound.stop();
+                  }
+                }
+              );
+            }
+            if (soundObj.stop) return thisSound.stop();
+            thisSound.volume = soundObj.volume;
+          });
+        }
+        if (dialog.media != undefined) {
+          Object.keys(dialog.media).forEach((media) => {
+            let values = dialog.media[media];
+            this.handlers.Media.addMedia({ ...values, name: media, onend: (options, element) => {
+              if (!values.ended) return;
+
+              if (values.ended.removeMedia) element.parentNode.remove();
+              if (values.ended.do) this.next(0, values.ended.do);
+            } });
+          });
+        }
+        if (dialog.choises != undefined) { // processing choises
+          if (dialog.other != undefined ) {
+            if (dialog.other.stopTypingAtChoises != undefined &amp;&amp; dialog.other.stopTypingAtChoises) {
+              this.typingInterval.disable();
+              this.typing = false;
+            }
+            if (dialog.other.hideUIAtChoises != undefined &amp;&amp; dialog.other.hideUIAtChoises) {
+              this.textElement.style.display = "none";
+            }
+          }
+          let choise = new Choises(dialog.choises);
+          let builded = choise.build();
+
+          this.choisesElement.appendChild(builded);
+
+          this.choisesElement.hidden = false;
+
+          choise.onSelect = (choiseObj, element) => {
+            if (choiseObj.hideChoisesElement == undefined || choiseObj.hideChoisesElement) {
+              this.choisesElement.hidden = true;
+              this.choisesElement.querySelector(".choisesParent").remove();
+            }
+
+            if (choiseObj.do.process != undefined) {
+              if (choiseObj.do.removeChoise != undefined &amp;&amp; choiseObj.do.removeChoise) {
+                element.remove();
+              }
+              this.next(0, choiseObj.do.process);
+            }
+          }
+
+          choise.onMouseEnter = (choiseObj, element) => {
+            if (choiseObj.do.mouseenter != undefined) {
+              if (choiseObj.do.mouseenter.removeChoise != undefined &amp;&amp; choiseObj.do.mouseenter.removeChoise) {
+                element.remove();
+              }
+              this.next(0, choiseObj.do.mouseenter);
+            }
+          }
+        }
         if (dialog.branch != undefined) {
           if (dialog.branch.set != undefined) {
             this.branch = dialog.branch.set;
             if (dialog.branch.cursor != undefined) {
-              this.readingIndex = dialog.branch.cursor;
+              this.index = dialog.branch.cursor;
             }
             this.next();
           }
+        }
+
+        if (dialog.objects != undefined) {
+          Object.keys(dialog.objects).forEach(objectName => {
+            const event = dialog.objects[objectName];
+            let object = new SceneObject(this.scene, event);
+            if (event.add) object.add();
+            if (event.html) object.setHtml(event.html, Object.fromEntries(this.varibles));
+
+            this.objects.set(objectName, object);
+          });
         }
         document.querySelector(".count").innerText = this.readingIndex + "; " + this.branchReading;
       },
@@ -485,6 +544,20 @@ export default class Engine {
     }
     else throw new Error("Cannot set branch " + value + ". Branch not found");
   }
+
+  get branch() {
+    return this.branchReading;
+  }
+
+  set index(value) {
+    if (this.index == this.registered[this.branch].length) throw new Error("Cannot set index " + value + ". End reached in branch " + this.branch); // if end reached
+
+    this.readingIndex = value;
+  }
+
+  get index() {
+    return this.readingIndex;
+  }
 }
 </code></pre>
         </article>
@@ -496,13 +569,13 @@ export default class Engine {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Choises.html">Choises</a></li><li><a href="module-Effects.html">Effects</a></li><li><a href="module-Engine.html">Engine</a></li><li><a href="module-Images.html">Images</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-Parser.html">Parser</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Text.html">Text</a></li></ul><h3>Namespaces</h3><ul><li><a href="config.html">config</a></li></ul><h3>Classes</h3><ul><li><a href="module-Choises-Choises.html">Choises</a></li><li><a href="module-Effects-Effects.html">Effects</a></li><li><a href="module-Engine-Engine.html">Engine</a></li><li><a href="module-Images-Images.html">Images</a></li><li><a href="module-Media-Media.html">Media</a></li><li><a href="module-Sound-Sound.html">Sound</a></li><li><a href="module-Text-Text.html">Text</a></li></ul><h3>Global</h3><ul><li><a href="global.html#arrayRemove">arrayRemove</a></li><li><a href="global.html#color">color</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Choises.html">Choises</a></li><li><a href="module-Effects.html">Effects</a></li><li><a href="module-Images.html">Images</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-Parser.html">Parser</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Text.html">Text</a></li></ul><h3>Namespaces</h3><ul><li><a href="global.html#config">config</a></li></ul><h3>Classes</h3><ul><li><a href="Engine.html">Engine</a></li><li><a href="module.exports.html">exports</a></li><li><a href="module-Choises-Choises.html">Choises</a></li><li><a href="module-Effects-Effects.html">Effects</a></li><li><a href="module-Images-Images.html">Images</a></li><li><a href="module-Media-Media.html">Media</a></li><li><a href="module-Sound-Sound.html">Sound</a></li><li><a href="module-Text-Text.html">Text</a></li></ul><h3>Global</h3><ul><li><a href="global.html#add">add</a></li><li><a href="global.html#arrayRemove">arrayRemove</a></li><li><a href="global.html#branchReading">branchReading</a></li><li><a href="global.html#choisesElement">choisesElement</a></li><li><a href="global.html#classList">classList</a></li><li><a href="global.html#color">color</a></li><li><a href="global.html#constructor">constructor</a></li><li><a href="global.html#dialogElement">dialogElement</a></li><li><a href="global.html#handlers">handlers</a></li><li><a href="global.html#html">html</a></li><li><a href="global.html#importScenario">importScenario</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#objects">objects</a></li><li><a href="global.html#onTypingEnd">onTypingEnd</a></li><li><a href="global.html#readingIndex">readingIndex</a></li><li><a href="global.html#registerDialog">registerDialog</a></li><li><a href="global.html#registered">registered</a></li><li><a href="global.html#scene">scene</a></li><li><a href="global.html#setHtml">setHtml</a></li><li><a href="global.html#setTitle">setTitle</a></li><li><a href="global.html#sounds">sounds</a></li><li><a href="global.html#sprites">sprites</a></li><li><a href="global.html#textElement">textElement</a></li><li><a href="global.html#typing">typing</a></li><li><a href="global.html#typingInterval">typingInterval</a></li><li><a href="global.html#varibles">varibles</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jun 23 2022 18:52:25 GMT+1000 (Vladivostok Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jul 19 2022 18:22:59 GMT+1000 (Vladivostok Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
