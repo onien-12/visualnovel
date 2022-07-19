@@ -7,11 +7,11 @@ import {
     color
 } from "./js/utils.js"
 
-// ------------------------------------------------------
-//                                                      |
-// You can see media example in the "scenario.js" file  |
-//                                                      |
-// ------------------------------------------------------
+// ───────────────────────────────────────────────────────────────────────┐
+//                                                                        │
+// You can see media (video and sound) example in the "scenario.js" file  │
+//                                                                        │
+// ───────────────────────────────────────────────────────────────────────┘
 
 export let scenario = {
     main: [ // branch name: main
@@ -56,7 +56,12 @@ export let scenario = {
                 ambience: { // sound name - ambience. You can set it to everything
                     src: "../sounds/forest_ambience.mp3", // source file
                     volume: 0.5, // start volume
-                    loop: true // will it loop
+                    // loop: true, // will it loop
+                    ended: {
+                        do: {
+                            text: "sound ended"
+                        }
+                    }
                 }
             }
         },

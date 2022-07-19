@@ -16,6 +16,10 @@ export default class Sound {
      * @desc html audio class
      */
 
+    /** @member {Function} ended
+     * @desc calls when sound ends
+     */
+
     /** @function constructor
      * @desc inits.
      * @param {string} file - audio file. will be used in the Audio class as file
@@ -93,5 +97,12 @@ export default class Sound {
      */
     set loop(value) {
         this.audio.loop = value;
+    }
+
+    /** @type {Function}
+     * @desc sets onended
+     */
+    set ended(value) {
+        this.audio.onended = value;
     }
 }

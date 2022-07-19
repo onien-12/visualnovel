@@ -109,7 +109,7 @@ export default class Effects {
      * @param {number} event.time - time
      * @param {string} event.easing - css easing
      * @param {object} event.styles - css styles
-     * @param {?object} event.stylesBefore - css styles before transition
+     * @param {object} [event.stylesBefore] - css styles before transition
      * @param {Function} end
      */
     anyEffect(element, event, end = () => {}) {

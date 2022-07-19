@@ -36,6 +36,17 @@ export let scenario = {
       background: {
         src: "../images/mountains.jpg",
       },
+      sounds: {
+        main: {
+          src: "../sounds/just_think.mp3", // source file
+          volume: 1, // start volume
+          ended: {
+            do: {
+              text: "just think ended"
+            }
+          }
+        }
+      }
     },
     {
       next: {
@@ -121,6 +132,21 @@ export let scenario = {
           },
         },
       },
+      objects: {
+        block: {
+          add: true,
+          style: {
+            position: "absolute",
+            zIndex: "998",
+            top: "10%",
+            left: "25%",
+            width: "150px",
+            height: "300px",
+            background: "green",
+            border: "3px solid blue"
+          }
+        }
+      },
       choises: [
         {
           name: "bad", // just a name for choise. It will not display
@@ -186,7 +212,33 @@ export let scenario = {
     {
       text: "[w] hello from brach dontknow akj lkjhsh",
       name: "wowowo dontknow branch",
-      next: true
+    },
+    {
+      
+      events: {
+        media: {
+          what: {
+            play: true
+          }
+        }
+      },
+      objects: {
+        nothing: {
+          tag: "span",
+          style: {
+            position: "absolute",
+            top: "50%",
+            left: "30%",
+            zIndex: "999"
+          },
+          html: "nothing happened! And yes, you can use { text='this parser', color='green' } here! With varibles, of course { lp }",
+          add: true // add to scene?
+        }
+      },
+      next: {
+        increment: 1,
+        instantly: true
+      }
     },
     {
       branch: {
@@ -194,9 +246,26 @@ export let scenario = {
         cursor: 4
       },
       events: {
-        media: {
-          what: {
-            play: true
+        objects: {
+          nothing: {
+            // if set <html> property, it will change inner html
+            // stylesBefore: { <styles> } // styles before transition
+            // remove: true // remove after transition
+            // add: true // if you didnt add to scene before (in initialization)
+            time: 3,
+            easing: "linear",
+            styles: {
+              opacity: "0.6",
+              top: "70%",
+              left: "60%"
+            }
+          },
+          block: {
+            time: 2,
+            easing: "ease",
+            styles: {
+              filter: "sepia(0.4)"
+            }
           }
         }
       }

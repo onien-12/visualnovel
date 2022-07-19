@@ -15,11 +15,11 @@ import {
     color
 } from "./js/utils.js"
 
-// ------------------------------------------------------
-//                                                      |
-// You can see media example in the "scenario.js" file  |
-//                                                      |
-// ------------------------------------------------------
+// ───────────────────────────────────────────────────────────────────────┐
+//                                                                        │
+// You can see media (video and sound) example in the "scenario.js" file  │
+//                                                                        │
+// ───────────────────────────────────────────────────────────────────────┘
 
 export let scenario = {
     main: [ // branch name: main
@@ -64,7 +64,12 @@ export let scenario = {
                 ambience: { // sound name - ambience. You can set it to everything
                     src: "../sounds/forest_ambience.mp3", // source file
                     volume: 0.5, // start volume
-                    loop: true // will it loop
+                    // loop: true, // will it loop
+                    ended: {
+                        do: {
+                            text: "sound ended"
+                        }
+                    }
                 }
             }
         },
@@ -182,8 +187,8 @@ export let scenario = {
                     bottle: { // applying to the "bottle"
                         styles: {
                             opacity: 0 // before removing, setting styles. So, it will start changing opacity to 0 and remove
-                        }, //                        |
-                        remove: true, //            < Remove sprite after transition. You can set time:0 and it can be instantly
+                        }, //                        │
+                        remove: true, //   ←─────────┘ Remove sprite after transition. You can set time:0 and it can be instantly
                         time: 0.5, // time
                         easing: "ease" // css easing
                     }

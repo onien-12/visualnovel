@@ -1,5 +1,4 @@
 /** Main engine file
- * @module Engine
  * @author Onien
  */
 
@@ -9,6 +8,7 @@ import Sound from "./sound.js";
 import Text from "./text.js";
 import Media from "./media.js";
 import Choises from "./choises.js";
+import SceneObject from "./object.js"; 
 
 /** Main Engine class. See {@tutorial scenario-example}
  * @class Engine
@@ -61,6 +61,10 @@ export default class Engine {
    * @desc contains all user-created varibles
    */
 
+  /** @member {Map<string, SceneObject>} objects
+   * @desc contains all scene objects
+   */
+
   /** @member {string} branchReading
    * @desc name of branch currently reading
    */
@@ -104,6 +108,7 @@ export default class Engine {
     this.typingInterval;
     this.sprites = new Map();
     this.varibles = new Map();
+    this.objects = new Map();
   }
 
   /** @method setTitle
@@ -368,6 +373,26 @@ export default class Engine {
               }
             });
           }
+
+          if (dialog.events.objects != undefined) {
+            Object.keys(dialog.events.objects).forEach((objectName) => {
+              if (!this.objects.has(objectName)) {
+                throw new Error("Object " + objectName + " not found!");
+              }
+              let object = this.objects.get(objectName);
+              const event = dialog.events.objects[objectName];
+
+              if (event.html) object.setHtml(event.html, Object.fromEntries(this.varibles));
+              if (event.add) object.add();
+
+              this.handlers.Effects.anyEffect(object.element, event, () => {
+                if (event.remove) { 
+                  object.element.remove();
+                  this.object.delete(objectName);
+                }
+              });
+            });
+          }
         }
         if (dialog.sounds != undefined) {
           // if sounds changed
@@ -380,6 +405,13 @@ export default class Engine {
             let thisSound = this.sounds[soundName]; // gettung sound from engine
             thisSound.play(); // starting sound
             thisSound.loop = soundObj.loop; // if loop
+
+            if (soundObj.ended && soundObj.ended.do) {
+              thisSound.ended = () => {
+                this.next(0, soundObj.ended.do);
+              }
+            }
+
             if (soundObj.transition) {
               // if transition
               return thisSound.transition(
@@ -457,6 +489,17 @@ export default class Engine {
             }
             this.next();
           }
+        }
+
+        if (dialog.objects != undefined) {
+          Object.keys(dialog.objects).forEach(objectName => {
+            const event = dialog.objects[objectName];
+            let object = new SceneObject(this.scene, event);
+            if (event.add) object.add();
+            if (event.html) object.setHtml(event.html, Object.fromEntries(this.varibles));
+
+            this.objects.set(objectName, object);
+          });
         }
         document.querySelector(".count").innerText = this.readingIndex + "; " + this.branchReading;
       },
