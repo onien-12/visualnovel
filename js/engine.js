@@ -1,4 +1,5 @@
 /** Main engine file
+ * @module Engine
  * @author Onien
  */
 

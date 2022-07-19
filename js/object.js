@@ -1,3 +1,8 @@
+/** Object module
+ * @module object
+ * @author Onien
+ */
+
 import { parse } from "./parser.js";
 
 /** @ class SceneObject
