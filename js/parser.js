@@ -83,6 +83,8 @@ function generateHTML(parsed) {
   let styles = "";
   let errors = [];
   let tagname = parsed.get("tag") ?? "span";
+  let className = "";
+  let id = "";
   parsed.forEach((value, key) => {
     if (key == "text") {
       text = value;
@@ -90,6 +92,12 @@ function generateHTML(parsed) {
       styles += "color: " + value + "; ";
     } else if (key == "background") {
       styles += "background: " + value + "; ";
+    } else if (key == "className") {
+      className = value;
+    } else if (key == "style") {
+      styles = value;
+    } else if (key == "id") {
+      id = value;
     } else if (key == "tag");
     else {
       return errors.push({
@@ -101,6 +109,10 @@ function generateHTML(parsed) {
   if (errors.length > 0) return errors;
   return `<${tagname}${
     styles.trim() != "" ? ' style="' + styles + '"' : ""
+  }${
+    className.trim() != "" ? ' class="' + className + '"' : ""
+  }${
+    id.trim() != "" ? ' id="' + id + '"' : ""
   }>${text}</${tagname}>`;
 }
 
@@ -120,6 +132,12 @@ function generateHTMLDOM(parsed) {
         newElement.style.color = value;
       } else if (key == "background") {
         newElement.style.background = value;
+      } else if (key == "style") {
+        newElement.setAttribute("style", value);
+      } else if (key == "id") {
+        newElement.id = value;
+      } else if (key == "className") {
+        newElement.className = value;
       } else if (key == "tag");
       else {
         return errors.push({

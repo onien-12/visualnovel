@@ -185,7 +185,12 @@ export default class Engine {
 
     if (dialog.beforeJS) {
       let returned = dialog.beforeJS.call(this, dialog, additionalJSArguments);
-      if (!returned) return;
+      if (!returned) {
+        if (dialog.beforeJSElse) {
+          this.next(0, dialog.beforeJSElse, additionalJSArguments, additionalParserVaribles);
+        }
+        return;
+      }
     }
 
     if (!dialog.other?.dontStopText)

@@ -142,6 +142,8 @@ export let scenario = {
       objects: {
         block: { // this block will be (drag&drop)
           add: true,
+          html: "{ text='', style='width: 10px; left: calc(100% - 10px); right: 0; bottom: 0; position: absolute; display: block; height: 10px', background='white', className='resizeHandler' }",
+          class: ["block"],
           style: {
             position: "absolute",
             zIndex: "998",
@@ -192,15 +194,47 @@ export let scenario = {
               varibles: {
                 clicked: {
                   set: 0
+                },
+                clickedResize: {
+                  set: 0
                 }
               }
             },
             onmousemove: {
               beforeJS: function () { // to get <this>
-                if (this.varibles.get("clicked") == 1) { // if mouse is down on object "block"
+                if (this.varibles.get("clicked") == 1 && this.varibles.get("clickedResize") == 0) { // if mouse is down on object "block"
                   return true;
                 }
                 return false; // just stop execution
+              },
+              beforeJSElse: { // if beforeJS returned false
+                beforeJS: function () {
+                  if (this.varibles.get("clickedResize") == 1) return true;
+                  return false;
+                },
+                varibles: {
+                  resizeX: {
+                    type: "int",
+                    set: "{ event.pageX }",
+                    decrement: "{ resizeHandlerX }"
+                  },
+                  resizeY: {
+                    type: "int",
+                    set: "{ event.pageY }",
+                    decrement: "{ resizeHandlerY }"
+                  }
+                },
+                events: {
+                  objects: {
+                    block: {
+                      time: 0,
+                      styles: {
+                        height: "{ resizeY }px",
+                        width: "{ resizeX }px"
+                      }
+                    }
+                  }
+                }
               },
               varibles: {
                 moveX: {
@@ -223,6 +257,29 @@ export let scenario = {
                       left: "{ moveX }px"
                     }
                   }
+                }
+              }
+            }
+          }
+        },
+        resizehandler: {
+          get: ".block > .resizeHandler",
+          events: {
+            onmousedown: {
+              varibles: {
+                clickedResize: {
+                  set: 1
+                },
+                clicked: {
+                  set: 0
+                },
+                resizeHandlerX: {
+                  type: "int",
+                  set: "{ event.target.parentNode.offsetLeft }"
+                },
+                resizeHandlerY: {
+                  type: "int",
+                  set: "{ event.target.parentNode.offsetTop }"
                 }
               }
             }
@@ -292,7 +349,7 @@ export let scenario = {
         src: "../images/bus.jpg",
         transition: {
           name: "fade",
-          time: 3,
+          time: 10,
           easing: "ease"
         }
       }
