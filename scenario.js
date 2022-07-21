@@ -47,8 +47,12 @@ export let scenario = {
           }
         }
       },
-      js: (dialog) => { // this function will execute. There is 1 argument - current dialog. But if you use `function () { <code> }`, you can use <this> keyword and get engine
+      js: (dialog) => { // this function will execute after everything. There is 1 argument - current dialog. But if you use `function () { <code> }`, you can use <this> keyword and get engine
         console.log("hello from js");
+      },
+      beforeJS: (dialog) => { // this function will execute before everything; If in this function return false, dialog will stop;
+        console.log("before hello from js");
+        return true; // continue dialog
       }
     },
     {
@@ -136,7 +140,7 @@ export let scenario = {
         },
       },
       objects: {
-        block: {
+        block: { // this block will be (drag&drop)
           add: true,
           style: {
             position: "absolute",
@@ -147,6 +151,81 @@ export let scenario = {
             height: "300px",
             background: "green",
             border: "3px solid blue"
+          },
+          events: {
+            onmousedown: {
+              varibles: {
+                clicked: {
+                  set: 1
+                },
+                shiftX: {
+                  type: "int", // engine will parse everything to integer. There are 2 types: "str" and "int". By default its int, so, you can not set this type if you use integer
+                  set: "{ event.pageX }",
+                  decrement: "{ event.target.offsetLeft }"
+                },
+                shiftY: {
+                  type: "int",
+                  set: "{ event.pageY }",
+                  decrement: "{ event.target.offsetTop }"
+                }
+              }
+            }, // you can use all html events
+            onmouseup: {
+              varibles: {
+                clicked: {
+                  set: 0
+                }
+              }
+            }
+          }
+        },
+        global: { // invisible object on all screen to track mouse
+          get: "html", // if you want to use existing element (query selector)
+          style: {
+            position: "absolute",
+            height: "100vh",
+            width: "100%",
+            zIndex: "1000"
+          },
+          events: {
+            onmouseup: {
+              varibles: {
+                clicked: {
+                  set: 0
+                }
+              }
+            },
+            onmousemove: {
+              beforeJS: function () { // to get <this>
+                if (this.varibles.get("clicked") == 1) { // if mouse is down on object "block"
+                  return true;
+                }
+                return false; // just stop execution
+              },
+              varibles: {
+                moveX: {
+                  type: "int",
+                  set: "{ event.pageX }",
+                  decrement: "{ shiftX }"
+                },
+                moveY: {
+                  type: "int",
+                  set: "{ event.pageY }",
+                  decrement: "{ shiftY }"
+                }
+              },
+              events: {
+                objects: {
+                  block: {
+                    time: 0,
+                    styles: {
+                      top: "{ moveY }px",
+                      left: "{ moveX }px"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -208,7 +287,15 @@ export let scenario = {
     },
     {
       text: "really",
-      name: "i dont know"
+      name: "i dont know",
+      background: {
+        src: "../images/bus.jpg",
+        transition: {
+          name: "fade",
+          time: 3,
+          easing: "ease"
+        }
+      }
     },
     {
       repeat: {
@@ -295,7 +382,8 @@ export let scenario = {
   ],
   videoended: [
     {
-      text: "video actually ended"
+      text: "video actually ended",
+      
     },
     {
       timeout: {

@@ -10,6 +10,7 @@ import Text from "./text.js";
 import Media from "./media.js";
 import Choises from "./choises.js";
 import SceneObject from "./object.js"; 
+import { parse } from "./parser.js";
 
 /** Main Engine class. See {@tutorial scenario-example}
  * @class Engine
@@ -167,10 +168,11 @@ export default class Engine {
    * @param {number} [index=Engine#readingIndex]
    * @param {Object} [?dialog=null]
    * @param {Object} [additionalJSArguments={}] you can use js in your scenario. To use another varibles in this functions, you can fill thia array
+   * @param {Object} [additionalParserVaribles={}] add data to parser
    * @returns {Object} processed dialog
    */
 
-  next(index = this.index, dialog = null, additionalJSArguments = {}) {
+  next(index = this.index, dialog = null, additionalJSArguments = {}, additionalParserVaribles = {}) {
     if (dialog == null) 
       if (this.index == this.registered[this.branch].length) return; // if end reached
 
@@ -180,6 +182,11 @@ export default class Engine {
 
     if (dialog == null)
       dialog = this.registered[this.branch][this.index]; // this dialog
+
+    if (dialog.beforeJS) {
+      let returned = dialog.beforeJS.call(this, dialog, additionalJSArguments);
+      if (!returned) return;
+    }
 
     if (!dialog.other?.dontStopText)
       this.typingInterval?.disable();
@@ -214,11 +221,11 @@ export default class Engine {
             this.handlers.Text.type(
               dialog.text.replace("[w]", ""),
               this.dialogElement.innerHTML,
-              () => this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, Object.fromEntries(this.varibles)
+              () => this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, {...Object.fromEntries(this.varibles), ...additionalParserVaribles}
             );
           } else
             this.typingInterval = this.handlers.Text.type(dialog.text, "", () =>
-              this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, Object.fromEntries(this.varibles)
+              this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, {...Object.fromEntries(this.varibles), ...additionalParserVaribles}
             ); // type text
         }
 
@@ -242,30 +249,37 @@ export default class Engine {
               this.varibles.set(varible, 0);
             }
 
+            let toType = (type, value) => { // returns integer or string
+              if (!type || type == "int") {
+                return parseInt(value)
+              }
+              return value.toString();
+            }
+
             Object.keys(actions).forEach(action => {
               let value = actions[action];
 
               if (action == "set") {
-                this.varibles.set(varible, value);
+                this.varibles.set(varible, toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
               }
               else if (action == "increment") {
-                this.varibles.set(varible, this.varibles.get(varible) + value);
+                this.varibles.set(varible, this.varibles.get(varible) + toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
               }
               else if (action == "decrement") {
-                this.varibles.set(varible, this.varibles.get(varible) - value);
+                this.varibles.set(varible, this.varibles.get(varible) - toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
               }
               else if (action == "multiply") {
-                this.varibles.set(varible, this.varibles.get(varible) * value);
+                this.varibles.set(varible, this.varibles.get(varible) * toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
               }
               else if (action == "divide") {
-                this.varibles.set(varible, this.varibles.get(varible) / value);
+                this.varibles.set(varible, this.varibles.get(varible) / toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
               }
               // string functions
               else if (action == "conc") {
-                this.varibles.set(varible, this.varibles.get(varible) + value);
+                this.varibles.set(varible, this.varibles.get(varible) + toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
               }
               else if (action == "remove") {
-                this.varibles.set(varible, this.varibles.get(varible).replace(value, ""));
+                this.varibles.set(varible, this.varibles.get(varible).replace(toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})), ""));
               }
             });
           });
@@ -335,7 +349,7 @@ export default class Engine {
                   if (event.remove) {
                     element.remove();
                   }
-                });
+                }, {...Object.fromEntries(this.varibles), ...additionalParserVaribles});
               }
             });
           }
@@ -371,7 +385,7 @@ export default class Engine {
                     // if remove after effect ending
                     element.remove(); // removing
                   }
-                });
+                }, {...Object.fromEntries(this.varibles), ...additionalParserVaribles});
               }
             });
           }
@@ -384,7 +398,7 @@ export default class Engine {
               let object = this.objects.get(objectName);
               const event = dialog.events.objects[objectName];
 
-              if (event.html) object.setHtml(event.html, Object.fromEntries(this.varibles));
+              if (event.html) object.setHtml(event.html, {...Object.fromEntries(this.varibles), ...additionalParserVaribles});
               if (event.add) object.add();
 
               this.handlers.Effects.anyEffect(object.element, event, () => {
@@ -392,7 +406,7 @@ export default class Engine {
                   object.element.remove();
                   this.object.delete(objectName);
                 }
-              });
+              }, {...Object.fromEntries(this.varibles), ...additionalParserVaribles});
             });
           }
         }
@@ -496,9 +510,17 @@ export default class Engine {
         if (dialog.objects != undefined) {
           Object.keys(dialog.objects).forEach(objectName => {
             const event = dialog.objects[objectName];
-            let object = new SceneObject(this.scene, event);
+            let object = new SceneObject(this.scene, event, event.get ?? "");
             if (event.add) object.add();
             if (event.html) object.setHtml(event.html, Object.fromEntries(this.varibles));
+
+            if (event.events) {
+              Object.keys(event.events).forEach(eventName => {
+                object.element[eventName] = (eventHTML) => {
+                  this.next(0, event.events[eventName], { ...additionalJSArguments, event: eventHTML, eventName: eventName }, {...additionalParserVaribles, event: eventHTML});
+                }
+              });
+            }
 
             this.objects.set(objectName, object);
           });

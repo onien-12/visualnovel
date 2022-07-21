@@ -7,6 +7,8 @@
  * @class Effects
  */
 
+import { parse } from "./parser.js";
+
 export default class Effects {
     /** @member {HTMLElement} element
      * @desc element
@@ -111,15 +113,23 @@ export default class Effects {
      * @param {object} event.styles - css styles
      * @param {object} [event.stylesBefore] - css styles before transition
      * @param {Function} end
+     * @param {Object} parserData
      */
-    anyEffect(element, event, end = () => {}) {
-            if (event.stylesBefore)
-                Object.assign(element.style, event.stylesBefore);
-            element.style.transition = `all ${event.time.toString()}s ${event.easing == undefined ? '' : event.easing}`; // setting css transition
-            setTimeout(() => Object.assign(element.style, event.styles), 15); // assign styles
-            element.addEventListener("transitionend", () => { // on transition end
-                    element.style.transition = ""; // clear transition		
-                    end.call(this, element, event.styles);
-            });
+    anyEffect(element, event, end = () => {}, parserData = {}) {
+        let easing, styles = {};
+        let time = typeof event.time == "number" ? event.time : parse(event.time, parserData, {useDOM: true});
+        if (event.easing) easing = parse(event.easing, parserData, {useDOM: true});
+        Object.keys(event.styles).map((key) => styles[key] = parse(event.styles[key].toString(), parserData, {useDOM: true}));
+
+        if (event.stylesBefore) {
+            Object.assign(element.style, event.stylesBefore);
+            Object.keys(event.stylesBefore).map((key) => event.stylesBefore[key] = parse(event.stylesBefore[key].toString(), parserData, {useDOM: true}));
+        }
+        if (time != "0" || time != 0) element.style.transition = `all ${time.toString()}s ${easing == undefined ? '' : easing}`; // setting css transition
+        setTimeout(() => Object.assign(element.style, styles), event.time != 0 ? 15 : 0); // assign styles
+        element.addEventListener("transitionend", () => { // on transition end
+            element.style.transition = ""; // clear transition		
+            end.call(this, element, event.styles);
+        });
     }
 }

@@ -14,10 +14,15 @@ import { parse } from "./parser.js";
  * @param {string} [config.id] - id of the element. if not set, it defaults nothing ("")
  * @param {Object} [config.style] - style of the element (element.style html property) 
  * @param {Map<string, string>} [config.attrs] - html attributes
+ * @param {string} [selector] - if you dont wont to create new element, just use existing one
  */
 export default class SceneObject {
-    constructor(scene, config) {
-        this.element = document.createElement(config.tag ?? "div"); // if not exists, tag will be <div>
+    constructor(scene, config, selector = "") {
+        if (!selector) 
+            this.element = document.createElement(config.tag ?? "div"); // if not exists, tag will be <div>
+        else 
+            this.element = document.querySelector(selector);
+
         this.element.classList.add(...(config.class ?? [])); // if not exists, add nothing
         this.element.id = config.id ?? ""; // sets id or nothing
         if (config.style) Object.assign(this.element.style, config.style); // sets styles

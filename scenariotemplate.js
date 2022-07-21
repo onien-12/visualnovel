@@ -23,7 +23,7 @@ export let scenario = {
                 // also, here can be transition, it should be so then
                 /*
                 transition: {
-                    name: "opacity", // - there's only one transition, but I will add more
+                    name: "opacity", // - there's are two transitions, but I will add more
                     time: 1, // - 1 second
                     easing: "easeOut" // - css transition easing. Engine uses css
                 }

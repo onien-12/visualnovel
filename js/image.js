@@ -52,6 +52,28 @@ export default class Images {
                     element.style.opacity = 1;
                 });
             }
+            else if (animation.name == "fade") {
+                let newBackground = document.createElement("div");
+
+                newBackground.classList.add("background", "image");
+
+                newBackground.position = "absolute";
+                newBackground.opacity = 0;
+
+                this.setImage(image, newBackground);
+
+                this.element.parentNode.appendChild(newBackground);
+
+                element.style.transition = newBackground.style.transition = `opacity ${animation.time}s ${animation.easing}`;
+                setTimeout(() => { element.style.opacity = 0; newBackground.style.opacity = 1 }, 15);
+                
+                element.addEventListener("transitionend", () => {
+                    this.setImage(image, element);
+                    newBackground.remove();
+                    element.style.transition = "";
+                    element.style.opacity = 1;
+                });
+            }
         }
     }
 
