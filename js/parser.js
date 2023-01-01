@@ -50,8 +50,8 @@ function parseVar(token, data) {
 /** @function Throw
  * @desc retuns error message
  * @example
- *  // returns "ERROR: message at 2! Substring wowo - 5 in token tokeeen"
- *  Throw("message", {
+ *  // returns "ERROR: messageage at 2! Substring wowo - 5 in token tokeeen"
+ *  Throw("messageage", {
  *    idx: 2, substr: "wowo", substridx: 5, token: "tokeeen"
  *  })
  * @param {string} message
@@ -171,6 +171,7 @@ function generateHTMLDOM(parsed) {
  *    ],
  *    phrase: "this is the phrase"
  *  })
+
  *  @param {string} str - string to parse
  *  @param {Object} data
  *  @param {Object} options

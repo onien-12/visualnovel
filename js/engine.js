@@ -10,6 +10,7 @@ import Text from "./text.js";
 import Media from "./media.js";
 import Choises from "./choises.js";
 import SceneObject from "./object.js"; 
+import Runner from "./novlang/run.js";
 import { parse } from "./parser.js";
 
 /** Main Engine class. See {@tutorial scenario-example}
@@ -121,10 +122,32 @@ export default class Engine {
     document.querySelector("title").innerText = text;
   }
 
+  /** @method executeScript
+   * @desc executes script
+   * @param {string} script
+   */
+  executeScript(script) {
+    let runner = new Runner(script);
+    runner.run();
+
+    this.registered = runner.scenario;
+    this.branch = 'main';
+    this.next();
+  }
+
+  /** @method importScript
+   * @desc import js file without executing it
+   */
+  importScript(file, loaded) {
+    import(file).then(script => {
+      loaded(script);
+    })
+  }
+
   /** @method importScenario
    * @desc imports scenario from file. Uses "import" fucntion
    * @param {string} file - which file will be loaded
-   * @param {Function} loaded - when file is loaded
+   * @param {() => void} loaded - when file is loaded
    */
   importScenario(file, loaded) {
     import(file).then((scenario) => {

@@ -9,10 +9,8 @@ let choises = document.querySelector(".choises");
 
 let engine = new Engine(backgroundImage, dialogElement, effects, scene, choises, config);
 
-engine.importScenario("../scenario.js", () => {
-    engine.branch = "main";
-    engine.next();
-    engine.setTitle("Hello");
+engine.importScript('/script.js', (script) => {
+    engine.executeScript(script);
 });
 
 document.onkeyup = (event) => {

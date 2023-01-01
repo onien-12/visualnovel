@@ -440,7 +440,6 @@ export let scenario = {
   videoended: [
     {
       text: "video actually ended",
-      
     },
     {
       timeout: {
