@@ -1,6 +1,7 @@
 import { SceneAPI } from "./SceneAPI.js";
 import { SoundTransitionAPI, SoundAPI } from "./SoundAPI.js";
-import { TransitionAPI } from "./TransitionAPI.js";
+import { SpriteAPI } from "./SpriteAPI.js";
+import { BackgroundTransitionAPI, SpriteTransitionAPI } from "./TransitionAPI.js";
 
 /** runs novlang script */
 export default class Runner {
@@ -41,9 +42,11 @@ export default class Runner {
 
 export let api = {
     Scene: SceneAPI,
-    Transition: TransitionAPI,
-    Sound: {
-        Transition: SoundTransitionAPI,
-        Sound: SoundAPI
+    Sprite: SpriteAPI,
+    Sound:  SoundAPI,
+    Transition: {
+        Background: BackgroundTransitionAPI,
+        Sprite: SpriteTransitionAPI,
+        Sound: SoundTransitionAPI
     }
 }

@@ -1,5 +1,6 @@
 import { SoundAPI } from "./SoundAPI.js";
-import { TransitionAPI } from "./TransitionAPI.js";
+import { SpriteAPI } from "./SpriteAPI.js";
+import { BackgroundTransitionAPI } from "./TransitionAPI.js";
 
 export class SceneAPI {
     #scene = {};
@@ -25,7 +26,7 @@ export class SceneAPI {
 
     /** sets background
      * @param {string} file
-     * @param {TransitionAPI} transition
+     * @param {BackgroundTransitionAPI} transition
      */
     setBackground(file, transition = null) {
         this.#scene.background = { src: file };
@@ -41,6 +42,16 @@ export class SceneAPI {
     addSound(name, sound) {
         if (!this.#scene.sounds) this.#scene.sounds = {};
         this.#scene.sounds[name] = sound.getSound();
+    }
+
+    /**
+     * adds sprite to scene
+     * @param {string} name 
+     * @param {SpriteAPI} sprite 
+     */
+    addSprite(name, sprite) {
+        if (!this.#scene.sprites) this.#scene.sprites = {};
+        this.#scene.sprites[name] = sprite.getSprite();
     }
 
     /** builds scene */

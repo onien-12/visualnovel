@@ -18,10 +18,18 @@ export const main = ({ loadScene, createBranch }) => {
     helloworld.setBackground('/images/bus.jpg');
 
     let test = new api.Scene('[w] text', 'test');
-    // let music = new api.Sound.Sound('/sounds/just_think.mp3');
-    // test.addSound('music', music);
+    let sprite = new api.Sprite('50%', '70%');
+    sprite.addPose('sprite', '/images/sprite.jpg');
+    sprite.addPose('coke', '/images/coke.jpg');
+    
+    sprite.setPose('sprite');
 
-    test.setBackground('/images/mountains.jpg', new api.Transition('opacity', 1));
+    // let music = new api.Sound('/sounds/just_think.mp3');
+    // music.setTransition(new api.Transition.Sound(1, 0.5, 0.1, 2));
+    // test.addSound('music', music)
+
+    test.setBackground('/images/mountains.jpg', new api.Transition.Background('opacity', 1));
+    test.addSprite('sprite', sprite);
 
     loadScene('main', helloworld);
     loadScene('main', test);
