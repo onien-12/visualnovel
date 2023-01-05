@@ -1,6 +1,7 @@
 import Engine from "../engine.js";
 import { SoundAPI } from "./SoundAPI.js";
-import { TransitionAPI } from "./TransitionAPI.js";
+import { SpriteAPI } from "./SpriteAPI.js";
+import { BackgroundTransitionAPI } from "./TransitionAPI.js";
 import { VariableAPI } from './VariableAPI.js';
 
 export class SceneAPI {
@@ -27,7 +28,7 @@ export class SceneAPI {
 
     /** sets background
      * @param {string} file
-     * @param {TransitionAPI} transition
+     * @param {BackgroundTransitionAPI} transition
      */
     setBackground(file, transition = null) {
         this.#scene.background = { src: file };
@@ -84,6 +85,16 @@ export class SceneAPI {
         }
     }
 
+    /**
+     * adds sprite to scene
+     * @param {string} name 
+     * @param {SpriteAPI} sprite 
+     */
+    addSprite(name, sprite) {
+        if (!this.#scene.sprites) this.#scene.sprites = {};
+        this.#scene.sprites[name] = sprite.getSprite();
+    }
+
     /** beforeJS in scene
      * @param {(engine: Engine, dialog, additionalJSArguments) => boolean} func
      */
@@ -93,6 +104,8 @@ export class SceneAPI {
     get onbefore() {
         return this.#scene.beforeJS;
     }
+
+    
 
     /** builds scene */
     getScene() {

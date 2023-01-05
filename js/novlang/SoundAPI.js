@@ -94,7 +94,7 @@ export class SoundAPI {
      * @param {boolean} stopAfter
      */
     setTransition(transition, stopAfter = false) {
-        this.#sound.transition = transition;
+        this.#sound.transition = transition.getTransition();
         this.#sound.stop = stopAfter;
     }
 
