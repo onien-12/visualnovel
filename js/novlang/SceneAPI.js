@@ -105,8 +105,6 @@ export class SceneAPI {
         return this.#scene.beforeJS;
     }
 
-    
-
     /** builds scene */
     getScene() {
         return this.#scene;
