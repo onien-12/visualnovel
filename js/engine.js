@@ -110,7 +110,7 @@ export default class Engine {
     this.typing = false;
     this.typingInterval;
     this.sprites = new Map();
-    this.varibles = new Map();
+    this.variables = new Map();
     this.objects = new Map();
   }
 
@@ -188,8 +188,8 @@ export default class Engine {
 
   /** @method next
    * @desc processes dialog from Engine#registered under index (index)
-   * @param {number} [index=Engine#readingIndex]
-   * @param {Object} [?dialog=null]
+   * @param {number} [index=readingIndex]
+   * @param {Object} [?dialog]
    * @param {Object} [additionalJSArguments={}] you can use js in your scenario. To use another varibles in this functions, you can fill thia array
    * @param {Object} [additionalParserVaribles={}] add data to parser
    * @returns {Object} processed dialog
@@ -207,7 +207,7 @@ export default class Engine {
       dialog = this.registered[this.branch][this.index]; // this dialog
 
     if (dialog.beforeJS) {
-      let returned = dialog.beforeJS.call(this, dialog, additionalJSArguments);
+      let returned = dialog.beforeJS.call(this, this, dialog, additionalJSArguments);
       if (!returned) {
         if (dialog.beforeJSElse) {
           this.next(0, dialog.beforeJSElse, additionalJSArguments, additionalParserVaribles);
@@ -246,14 +246,14 @@ export default class Engine {
         } else {
           if (dialog.text.trim().startsWith("[w]")) {
             // if text continue at this dialog
-            this.handlers.Text.type(
+            this.typingInterval = this.handlers.Text.type(
               dialog.text.replace("[w]", ""),
               this.dialogElement.innerHTML,
-              () => this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, {...Object.fromEntries(this.varibles), ...additionalParserVaribles}
+              () => this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, {...Object.fromEntries(this.variables), ...additionalParserVaribles}
             );
           } else
             this.typingInterval = this.handlers.Text.type(dialog.text, "", () =>
-              this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, {...Object.fromEntries(this.varibles), ...additionalParserVaribles}
+              this.onTypingEnd(), this.handlers.Text.textEl, this.config.text.speed, {...Object.fromEntries(this.variables), ...additionalParserVaribles}
             ); // type text
         }
 
@@ -269,45 +269,78 @@ export default class Engine {
             dialog.background.transition
           ); // change background
         }
-        if (dialog.varibles != undefined) {
-          Object.keys(dialog.varibles).forEach((varible) => {
-            let actions = dialog.varibles[varible];
+        if (dialog.variables != undefined) {
+          Object.keys(dialog.variables).forEach((variable) => {
+            let actions = dialog.variables[variable];
+            let type = actions[0].type ?? 'int';
 
-            if (!this.varibles.has(varible)) { // creating then
-              this.varibles.set(varible, 0);
+            if (!this.variables.has(variable)) { // creating then
+              this.variables.set(variable, 0);
             }
 
             let toType = (type, value) => { // returns integer or string
               if (!type || type == "int") {
-                return parseInt(value)
+                return parseInt(value);
+              } else if (type == 'float') {
+                return parseFloat(value);
               }
               return value.toString();
             }
 
-            Object.keys(actions).forEach(action => {
-              let value = actions[action];
+            actions.forEach(_action => {
+              let value = _action[Object.keys(_action)[0]];
+              let action = Object.keys(_action)[0];
+
+              if (action == 'type') return;
+
+              const parserParams = { ...Object.fromEntries(this.variables), ...additionalParserVaribles };
 
               if (action == "set") {
-                this.varibles.set(varible, toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
+                this.variables.set(variable, toType(type, parse(value.toString(), parserParams)));
               }
               else if (action == "increment") {
-                this.varibles.set(varible, this.varibles.get(varible) + toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
+                this.variables.set(variable, this.variables.get(variable) + toType(type, parse(value.toString(), parserParams)));
               }
               else if (action == "decrement") {
-                this.varibles.set(varible, this.varibles.get(varible) - toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
+                this.variables.set(variable, this.variables.get(variable) - toType(type, parse(value.toString(), parserParams)));
               }
               else if (action == "multiply") {
-                this.varibles.set(varible, this.varibles.get(varible) * toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
+                this.variables.set(variable, this.variables.get(variable) * toType(type, parse(value.toString(), parserParams)));
               }
               else if (action == "divide") {
-                this.varibles.set(varible, this.varibles.get(varible) / toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
+                this.variables.set(variable, this.variables.get(variable) / toType(type, parse(value.toString(), parserParams)));
               }
+              else if (action == 'root') {
+                this.variables.set(variable, Math.pow(this.variables.get(variable), 1 / toType(type, parse(value.toString(), parserParams))));
+              }
+              else if (action == 'round') {
+                this.variables.set(variable, +this.variables.get(variable).toFixed(toType(type, parse(value.toString(), parserParams))));
+              }
+              else if (action == 'floor') {
+                this.variables.set(variable, Math.floor(this.variables.get(variable)));
+              }
+              else if (action == 'ceil') {
+                this.variables.set(variable, Math.ceil(this.variables.get(variable)));
+              }
+              else if (action == 'cos') {
+                this.variables.set(variable, Math.cos(this.variables.get(variable)));
+              }
+              else if (action == 'sin') {
+                this.variables.set(variable, Math.sin(this.variables.get(variable)));
+              }
+
               // string functions
               else if (action == "conc") {
-                this.varibles.set(varible, this.varibles.get(varible) + toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})));
+                this.variables.set(variable, this.variables.get(variable) + toType(type, parse(value.toString(), parserParams)));
               }
               else if (action == "remove") {
-                this.varibles.set(varible, this.varibles.get(varible).replace(toType(actions.type, parse(value.toString(), {...Object.fromEntries(this.varibles), ...additionalParserVaribles})), ""));
+                this.variables.set(variable, this.variables.get(variable).replace(toType(type, parse(value.toString(), parserParams)), ""));
+              } 
+              else if (action == 'replace') {
+                this.variables.set(variable, this.variables.get(variable).replace(
+                  toType(type, parse(value.value.toString(), parserParams)),
+                  value.replacer
+                ));
               }
             });
           });
@@ -377,7 +410,7 @@ export default class Engine {
                   if (event.remove) {
                     element.remove();
                   }
-                }, {...Object.fromEntries(this.varibles), ...additionalParserVaribles});
+                }, {...Object.fromEntries(this.variables), ...additionalParserVaribles});
               }
             });
           }
@@ -413,7 +446,7 @@ export default class Engine {
                     // if remove after effect ending
                     element.remove(); // removing
                   }
-                }, {...Object.fromEntries(this.varibles), ...additionalParserVaribles});
+                }, {...Object.fromEntries(this.variables), ...additionalParserVaribles});
               }
             });
           }
@@ -426,7 +459,7 @@ export default class Engine {
               let object = this.objects.get(objectName);
               const event = dialog.events.objects[objectName];
 
-              if (event.html) object.setHtml(event.html, {...Object.fromEntries(this.varibles), ...additionalParserVaribles});
+              if (event.html) object.setHtml(event.html, {...Object.fromEntries(this.variables), ...additionalParserVaribles});
               if (event.add) object.add();
 
               this.handlers.Effects.anyEffect(object.element, event, () => {
@@ -434,7 +467,7 @@ export default class Engine {
                   object.element.remove();
                   this.object.delete(objectName);
                 }
-              }, {...Object.fromEntries(this.varibles), ...additionalParserVaribles});
+              }, {...Object.fromEntries(this.variables), ...additionalParserVaribles});
             });
           }
         }
@@ -540,7 +573,7 @@ export default class Engine {
             const event = dialog.objects[objectName];
             let object = new SceneObject(this.scene, event, event.get ?? "");
             if (event.add) object.add();
-            if (event.html) object.setHtml(event.html, Object.fromEntries(this.varibles));
+            if (event.html) object.setHtml(event.html, Object.fromEntries(this.variables));
 
             if (event.events) {
               Object.keys(event.events).forEach(eventName => {
@@ -582,7 +615,7 @@ export default class Engine {
     }
 
     if (dialog.js) {
-      dialog.js.call(this, dialog, additionalJSArguments);
+      dialog.js.call(this, this, dialog, additionalJSArguments);
     }
 
     return dialog;

@@ -1,5 +1,7 @@
+import Engine from "../engine.js";
 import { SoundAPI } from "./SoundAPI.js";
 import { TransitionAPI } from "./TransitionAPI.js";
+import { VariableAPI } from './VariableAPI.js';
 
 export class SceneAPI {
     #scene = {};
@@ -36,11 +38,60 @@ export class SceneAPI {
     }
 
     /** adds sound
+     * @param {string} name
      * @param {SoundAPI} sound
      */
     addSound(name, sound) {
         if (!this.#scene.sounds) this.#scene.sounds = {};
         this.#scene.sounds[name] = sound.getSound();
+    }
+
+    /** adds variable controller 
+     * @param {string} name
+     * @param {VariableAPI} variable
+    */
+    addVariable(name, variable) {
+        if (!this.#scene.variables) this.#scene.variables = {};
+        this.#scene.variables[name] = variable.getVariable();
+    }
+
+    /** sets <timeout> 
+     * @param {number} timeout
+     * @param {SceneAPI} instant
+    */
+    setTimeout(timeout, instant = null) {
+        if (!instant) {
+            this.#scene.timeout = timeout
+        } else {
+            this.#scene.timeout = {
+                duration: timeout,
+                doInstantly: instant.getScene()
+            }
+        }
+    }
+
+    /** set skipping (<next> property)
+     * @param {number} increment how many dialogs will be skipped
+     * @param {boolean} instantly after typing end or not
+     */
+    setNext(increment = 1, instantly = false) {
+        if (increment == 1 && instantly == false) this.#scene.next = true;
+        else {
+            this.#scene.next = {
+                increment,
+                instantly
+            }
+        }
+    }
+
+    /** beforeJS in scene
+     * @param {(engine: Engine, dialog, additionalJSArguments) => boolean} func
+     */
+    set onbefore(func) {
+        this.#scene.beforeJS = func;
+    }
+    get onbefore() {
+        return this.#scene.beforeJS;
     }
 
     /** builds scene */

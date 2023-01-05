@@ -4,7 +4,6 @@
  */
 
 import Windows from "./windowSystem.js";
-import { removeArray } from "../utils.js";
 
 let 
 	ScenesElement = document.querySelector(".scenes"),

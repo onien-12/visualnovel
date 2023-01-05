@@ -28,10 +28,33 @@ export let scenario = {
           },
         },
       },
-      varibles: {
-        lp: { // also there are methods: increment, decrement, multiply, divide, -- string funcs -- conc, remove (replaces value to "")
-          set: 0
-        }
+      variables: {
+        lp: [ // also there are methods: increment, decrement, multiply, divide, root, floor, ceil, cos, sin -- string funcs -- conc, remove (replaces value to "")
+          { set: 5 }
+          /*
+          { root: 2 } // value is the root
+          or { root: 5 }
+
+          also
+          { round: 5 } // number of numbers after period
+          { floor: 0 } // every number
+          { ceil: 0 } // every number
+          { cos: 0 } // every number
+          { sin: 0 } // every number
+          */
+        ],
+        /*
+        somstring: [
+          { set: 'hello' },
+          { 
+            replace: {
+              value: 'llo',
+              replacer: 'what'
+            }
+          }
+        ]
+        the <somestring> will be hewhat
+        */
       },
       background: {
         src: "../images/mountains.jpg",
@@ -47,10 +70,10 @@ export let scenario = {
           }
         }
       },
-      js: (dialog) => { // this function will execute after everything. There is 1 argument - current dialog. But if you use `function () { <code> }`, you can use <this> keyword and get engine
+      js: (engine, dialog) => { // this function will execute after everything. There is 1 argument - current dialog. But if you use `function () { <code> }`, you can use <this> keyword and get engine
         console.log("hello from js");
       },
-      beforeJS: (dialog) => { // this function will execute before everything; If in this function return false, dialog will stop;
+      beforeJS: (engine, dialog) => { // this function will execute before everything; If in this function return false, dialog will stop;
         console.log("before hello from js");
         return true; // continue dialog
       }
@@ -156,27 +179,27 @@ export let scenario = {
           },
           events: {
             onmousedown: {
-              varibles: {
-                clicked: {
-                  set: 1
-                },
-                shiftX: {
-                  type: "int", // engine will parse everything to integer. There are 2 types: "str" and "int". By default its int, so, you can not set this type if you use integer
-                  set: "{ event.pageX }",
-                  decrement: "{ event.target.offsetLeft }"
-                },
-                shiftY: {
-                  type: "int",
-                  set: "{ event.pageY }",
-                  decrement: "{ event.target.offsetTop }"
-                }
+              variables: {
+                clicked: [
+                  { set: 1 }
+                ],
+                shiftX: [
+                  { type: "int" }, // engine will parse everything to integer. There are 3 types: "str", "int" and 'float'. By default its int, so, you can not set this type if you use integer
+                  { set: "{ event.pageX }" },
+                  { decrement: "{ event.target.offsetLeft }" }
+                ],
+                shiftY: [
+                  { type: "int" }, // type should be on the first place
+                  { set: "{ event.pageY }" },
+                  { decrement: "{ event.target.offsetTop }" }
+                ]
               }
             }, // you can use all html events
             onmouseup: {
-              varibles: {
-                clicked: {
-                  set: 0
-                }
+              variables: {
+                clicked: [
+                  { set: 0 }
+                ]
               }
             }
           }
@@ -191,38 +214,38 @@ export let scenario = {
           },
           events: {
             onmouseup: {
-              varibles: {
-                clicked: {
-                  set: 0
-                },
-                clickedResize: {
-                  set: 0
-                }
+              variables: {
+                clicked: [
+                  { set: 0 }
+                ],
+                clickedResize: [
+                  { set: 0 }
+                ]
               }
             },
             onmousemove: {
               beforeJS: function () { // to get <this>
-                if (this.varibles.get("clicked") == 1 && this.varibles.get("clickedResize") == 0) { // if mouse is down on object "block"
+                if (this.variables.get("clicked") == 1 && this.variables.get("clickedResize") == 0) { // if mouse is down on object "block"
                   return true;
                 }
                 return false; // just stop execution
               },
               beforeJSElse: { // if beforeJS returned false
-                beforeJS: function () {
-                  if (this.varibles.get("clickedResize") == 1) return true;
+                beforeJS: (engine) => { // also you can do so
+                  if (engine.variables.get("clickedResize") == 1) return true;
                   return false;
                 },
-                varibles: {
-                  resizeX: {
-                    type: "int",
-                    set: "{ event.pageX }",
-                    decrement: "{ resizeHandlerX }"
-                  },
-                  resizeY: {
-                    type: "int",
-                    set: "{ event.pageY }",
-                    decrement: "{ resizeHandlerY }"
-                  }
+                variables: {
+                  resizeX: [
+                    { type: "int" },
+                    { set: "{ event.pageX }" },
+                    { decrement: "{ resizeHandlerX }" }
+                  ],
+                  resizeY: [
+                    { type: "int" },
+                    { set: "{ event.pageY }" },
+                    { decrement: "{ resizeHandlerY }" }
+                  ]
                 },
                 events: {
                   objects: {
@@ -236,17 +259,17 @@ export let scenario = {
                   }
                 }
               },
-              varibles: {
-                moveX: {
-                  type: "int",
-                  set: "{ event.pageX }",
-                  decrement: "{ shiftX }"
-                },
-                moveY: {
-                  type: "int",
-                  set: "{ event.pageY }",
-                  decrement: "{ shiftY }"
-                }
+              variables: {
+                moveX: [
+                  { type: "int" },
+                  { set: "{ event.pageX }" },
+                  { decrement: "{ shiftX }" }
+                ],
+                moveY: [
+                 { type: "int" },
+                 { set: "{ event.pageY }" },
+                 { decrement: "{ shiftY }" }
+                ]
               },
               events: {
                 objects: {
@@ -266,21 +289,21 @@ export let scenario = {
           get: ".block > .resizeHandler",
           events: {
             onmousedown: {
-              varibles: {
-                clickedResize: {
-                  set: 1
-                },
-                clicked: {
-                  set: 0
-                },
-                resizeHandlerX: {
-                  type: "int",
-                  set: "{ event.target.parentNode.offsetLeft }"
-                },
-                resizeHandlerY: {
-                  type: "int",
-                  set: "{ event.target.parentNode.offsetTop }"
-                }
+              variables: {
+                clickedResize: [
+                  { set: 1 }
+                ],
+                clicked: [
+                  { set: 0 }
+                ],
+                resizeHandlerX: [
+                  { type: "int" },
+                  { set: "{ event.target.parentNode.offsetLeft }" }
+                ],
+                resizeHandlerY: [
+                  { type: "int" },
+                  { set: "{ event.target.parentNode.offsetTop }" }
+                ]
               }
             }
           }
@@ -294,15 +317,15 @@ export let scenario = {
           hidden: false, // if it visible
           do: { // do if chosen
             process: { // process (Engine#next)
-              varibles: { // setting variblesd
-                lp: { // varibles reading action-by-action: if first is set to 5, second is increment by 4 and third is decrement by 7, then result will be = 2 ( 5 + 4 - 7 )
-                  increment: 1, // first action
-                  multiply: 3, // 2-d
-                  divide: 2, // 3-d
-                  increment: 3, // 4-th
-                  decrement: 2 // 5-th
+              variables: { // setting variablesd
+                lp: [ // variables reading action-by-action: if first is set to 5, second is increment by 4 and third is decrement by 7, then result will be = 2 ( 5 + 4 - 7 )
+                  { increment: 1 }, // first action
+                  { multiply: 3 }, // 2-d
+                  { divide: 2 }, // 3-d
+                  { increment: 3 }, // 4-th
+                  { decrement: 2 } // 5-th
                   // result = 2.5
-                }
+                ]
               },
               branch: { // setting branch
                 set: "dontknow" // setting branch
@@ -325,10 +348,10 @@ export let scenario = {
               // removeChoise: true, // if you want to remove choise user clicked
               text: "good",
               name: "good",
-              varibles: {
-                lp: {
-                  increment: 35
-                }
+              variables: {
+                lp: [
+                  { increment: 35 }
+                ]
               }
             },
             mouseenter: {
@@ -358,12 +381,12 @@ export let scenario = {
       repeat: {
         times: 15, // set how many times we need to repeat <do> section
         do: { // what we need to repeat
-          varibles: { // just increment (lp) varible
-            lp: {
-              increment: 1
-            }
+          variables: { // just increment (lp) varible
+            lp: [
+              { increment: 1 }
+            ]
           },
-          js: (dialog, { iteration }) => {
+          js: (engine, dialog, { iteration }) => {
             console.log("yea " + iteration);
           }
         },
@@ -397,7 +420,7 @@ export let scenario = {
             left: "30%",
             zIndex: "999"
           },
-          html: "nothing happened! And yes, you can use { text='this parser', color='green' } here! With varibles, of course { lp }",
+          html: "nothing happened! And yes, you can use { text='this parser', color='green' } here! With variables, of course { lp }",
           add: true // add to scene?
         }
       },

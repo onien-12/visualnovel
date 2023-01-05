@@ -105,8 +105,8 @@ export let scenario = {
                   hidden: false, // if it visible
                   do: { // do if chosen
                     process: { // process (Engine#next)
-                      varibles: { // setting variblesd
-                        lp: { // varibles reading action-by-action: if first is set to 5, second is increment by 4 and third is decrement by 7, then result will be = 2 ( 5 + 4 - 7 )
+                      variables: { // setting variablesd
+                        lp: { // variables reading action-by-action: if first is set to 5, second is increment by 4 and third is decrement by 7, then result will be = 2 ( 5 + 4 - 7 )
                           increment: 1, // first action
                           multiply: 3, // 2-d
                           divide: 2, // 3-d
@@ -133,7 +133,7 @@ export let scenario = {
                     process: {
                       text: "good",
                       name: "good",
-                      varibles: {
+                      variables: {
                         lp: {
                           increment: 35
                         }
