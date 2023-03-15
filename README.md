@@ -1,6 +1,6 @@
 # visualnovel
 visualnovel engine written in js
-
+Fully declarative engine
 
 With this engine you can write visualnovels using JSON!
 
